@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
     new ORM\Index(name: 'icao_code_idx', columns: ['icao_code']),
     new ORM\Index(name: 'iata_code_idx', columns: ['iata_code']),
 ])]
-class Airport
+class Airport implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'NONE')]
@@ -36,7 +36,6 @@ class Airport
     private ?float $elevationFt = null;
 
     #[ORM\ManyToOne(targetEntity: Country::class)]
-    #[ORM\JoinColumn(name: 'iso_country', referencedColumnName: 'code', nullable: false)]
     private Country $country;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -237,5 +236,28 @@ class Airport
     public function setCountry(Country $country): void
     {
         $this->country = $country;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'ident' => $this->getIdent(),
+            'type' => $this->getType(),
+            'name' => $this->getName(),
+            'latitudeDeg' => $this->getLatitudeDeg(),
+            'longitudeDeg' => $this->getLongitudeDeg(),
+            'elevationFt' => $this->getElevationFt(),
+            'country' => $this->getCountry()->getName(), // Assuming Country entity has a getName() method
+            'municipality' => $this->getMunicipality(),
+            'scheduledService' => $this->isScheduledService(),
+            'icaoCode' => $this->getIcaoCode(),
+            'iataCode' => $this->getIataCode(),
+            'gpsCode' => $this->getGpsCode(),
+            'localCode' => $this->getLocalCode(),
+            'homeLink' => $this->getHomeLink(),
+            'wikipediaLink' => $this->getWikipediaLink(),
+            'keywords' => $this->getKeywords()
+        ];
     }
 }
