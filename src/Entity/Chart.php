@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ChartRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
@@ -41,10 +43,17 @@ class Chart implements \JsonSerializable
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $subType = null;
 
+    /**
+     * @var Collection<int, Preset>
+     */
+    #[ORM\ManyToMany(targetEntity: Preset::class, mappedBy: 'charts', cascade: ['persist'])]
+    private Collection $presets;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->presets = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -145,6 +154,33 @@ class Chart implements \JsonSerializable
     public function setRunway(?string $runway): static
     {
         $this->runway = $runway;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Preset>
+     */
+    public function getPresets(): Collection
+    {
+        return $this->presets;
+    }
+
+    public function addPreset(Preset $preset): static
+    {
+        if (!$this->presets->contains($preset)) {
+            $this->presets->add($preset);
+            $preset->addChart($this);
+        }
+
+        return $this;
+    }
+
+    public function removePreset(Preset $preset): static
+    {
+        if ($this->presets->removeElement($preset)) {
+            $preset->removeChart($this);
+        }
+
         return $this;
     }
 }
