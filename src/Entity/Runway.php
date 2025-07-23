@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Runway
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'NONE')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
     private int $id;
 

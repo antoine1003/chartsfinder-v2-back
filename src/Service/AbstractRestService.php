@@ -35,6 +35,11 @@ abstract class AbstractRestService
         return $this->repository->findBy($criteria);
     }
 
+    public function findOneBy(array $criteria): ?object
+    {
+        return $this->repository->findOneBy($criteria);
+    }
+
     public function save(object $entity): void
     {
         $this->entityManager->persist($entity);

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\AirportRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AirportRepository::class)]
@@ -13,14 +15,11 @@ use Doctrine\ORM\Mapping as ORM;
 class Airport implements \JsonSerializable
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: 'NONE')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(length: 10)]
-    private string $ident;
-
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 255)]
     private string $type;
 
     #[ORM\Column(length: 255)]
@@ -38,32 +37,28 @@ class Airport implements \JsonSerializable
     #[ORM\ManyToOne(targetEntity: Country::class)]
     private Country $country;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $municipality = null;
-
-    #[ORM\Column(type: 'boolean')]
-    private bool $scheduledService;
-
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $icaoCode = null;
 
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $iataCode = null;
 
-    #[ORM\Column(length: 10, nullable: true)]
-    private ?string $gpsCode = null;
+    /**
+     * @var Collection<int, Chart>
+     */
+    #[ORM\OneToMany(targetEntity: Chart::class, mappedBy: 'airport', orphanRemoval: true)]
+    private Collection $charts;
 
-    #[ORM\Column(length: 10, nullable: true)]
-    private ?string $localCode = null;
+    /**
+     * @var Collection<int, Runway>
+     */
+    #[ORM\OneToMany(targetEntity: Runway::class, mappedBy: 'airport', orphanRemoval: true)]
+    private Collection $runways;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $homeLink = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $wikipediaLink = null;
-
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $keywords = null;
+    public function __construct()
+    {
+        $this->charts = new ArrayCollection();
+    }
 
 
 
@@ -75,16 +70,6 @@ class Airport implements \JsonSerializable
     public function setId(int $id): void
     {
         $this->id = $id;
-    }
-
-    public function getIdent(): string
-    {
-        return $this->ident;
-    }
-
-    public function setIdent(string $ident): void
-    {
-        $this->ident = $ident;
     }
 
     public function getType(): string
@@ -102,9 +87,10 @@ class Airport implements \JsonSerializable
         return $this->name;
     }
 
-    public function setName(string $name): void
+    public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
     }
 
     public function getLatitudeDeg(): float
@@ -138,34 +124,16 @@ class Airport implements \JsonSerializable
     }
 
 
-    public function getMunicipality(): ?string
-    {
-        return $this->municipality;
-    }
-
-    public function setMunicipality(?string $municipality): void
-    {
-        $this->municipality = $municipality;
-    }
-
-    public function isScheduledService(): bool
-    {
-        return $this->scheduledService;
-    }
-
-    public function setScheduledService(bool $scheduledService): void
-    {
-        $this->scheduledService = $scheduledService;
-    }
-
     public function getIcaoCode(): ?string
     {
         return $this->icaoCode;
     }
 
-    public function setIcaoCode(?string $icaoCode): void
+
+    public function setIcaoCode(?string $icaoCode): static
     {
         $this->icaoCode = $icaoCode;
+        return $this;
     }
 
     public function getIataCode(): ?string
@@ -176,56 +144,6 @@ class Airport implements \JsonSerializable
     public function setIataCode(?string $iataCode): void
     {
         $this->iataCode = $iataCode;
-    }
-
-    public function getGpsCode(): ?string
-    {
-        return $this->gpsCode;
-    }
-
-    public function setGpsCode(?string $gpsCode): void
-    {
-        $this->gpsCode = $gpsCode;
-    }
-
-    public function getLocalCode(): ?string
-    {
-        return $this->localCode;
-    }
-
-    public function setLocalCode(?string $localCode): void
-    {
-        $this->localCode = $localCode;
-    }
-
-    public function getHomeLink(): ?string
-    {
-        return $this->homeLink;
-    }
-
-    public function setHomeLink(?string $homeLink): void
-    {
-        $this->homeLink = $homeLink;
-    }
-
-    public function getWikipediaLink(): ?string
-    {
-        return $this->wikipediaLink;
-    }
-
-    public function setWikipediaLink(?string $wikipediaLink): void
-    {
-        $this->wikipediaLink = $wikipediaLink;
-    }
-
-    public function getKeywords(): ?string
-    {
-        return $this->keywords;
-    }
-
-    public function setKeywords(?string $keywords): void
-    {
-        $this->keywords = $keywords;
     }
 
     public function getCountry(): Country
@@ -242,22 +160,54 @@ class Airport implements \JsonSerializable
     {
         return [
             'id' => $this->getId(),
-            'ident' => $this->getIdent(),
             'type' => $this->getType(),
             'name' => $this->getName(),
             'latitudeDeg' => $this->getLatitudeDeg(),
             'longitudeDeg' => $this->getLongitudeDeg(),
             'elevationFt' => $this->getElevationFt(),
             'country' => $this->getCountry()->getName(), // Assuming Country entity has a getName() method
-            'municipality' => $this->getMunicipality(),
-            'scheduledService' => $this->isScheduledService(),
             'icaoCode' => $this->getIcaoCode(),
             'iataCode' => $this->getIataCode(),
-            'gpsCode' => $this->getGpsCode(),
-            'localCode' => $this->getLocalCode(),
-            'homeLink' => $this->getHomeLink(),
-            'wikipediaLink' => $this->getWikipediaLink(),
-            'keywords' => $this->getKeywords()
         ];
+    }
+
+    /**
+     * @return Collection<int, Chart>
+     */
+    public function getCharts(): Collection
+    {
+        return $this->charts;
+    }
+
+    public function addChart(Chart $chart): static
+    {
+        if (!$this->charts->contains($chart)) {
+            $this->charts->add($chart);
+            $chart->setAirport($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChart(Chart $chart): static
+    {
+        if ($this->charts->removeElement($chart)) {
+            // set the owning side to null (unless already changed)
+            if ($chart->getAirport() === $this) {
+                $chart->setAirport(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getRunways(): Collection
+    {
+        return $this->runways;
+    }
+
+    public function setRunways(Collection $runways): void
+    {
+        $this->runways = $runways;
     }
 }

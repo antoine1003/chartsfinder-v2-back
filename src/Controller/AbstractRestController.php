@@ -50,7 +50,7 @@ abstract class AbstractRestController extends AbstractController
         return $this->json($items);
     }
 
-    #[Route(path: '/search', name: '_find_by', methods: ['POST'])]
+    #[Route(path: '/search', name: '_search', methods: ['POST'])]
     public function searchItems(
         #[MapRequestPayload] SearchCriteriaDto $searchCriteriaDto
     ): JsonResponse
