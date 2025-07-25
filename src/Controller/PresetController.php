@@ -9,6 +9,7 @@ use App\Service\AirportRestService;
 use App\Service\PresetService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -41,5 +42,12 @@ class PresetController extends AbstractController
         // Convert items to DTOs if necessary
         $items = array_map(fn(Preset $item) => $item->toDto(), $items);
         return $this->json($items);
+    }
+
+    #[Route(path: '/{id}', name: '_delete', methods: ['DELETE'])]
+    public function delete(Preset $preset): JsonResponse
+    {
+        $this->presetService->delete($preset);
+        return $this->json(null, Response::HTTP_NO_CONTENT);
     }
 }

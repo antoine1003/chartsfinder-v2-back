@@ -73,4 +73,10 @@ class PresetService
     {
         return $this->presetRepository->findMine();
     }
+
+    public function delete(Preset $preset): void
+    {
+        $this->entityManager->remove($preset);
+        $this->entityManager->flush();
+    }
 }
