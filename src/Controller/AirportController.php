@@ -18,4 +18,9 @@ class AirportController extends AbstractRestController
     {
         parent::__construct($service);
     }
+
+    function getGroupPrefix(): string
+    {
+        return 'airport';
+    }
 }

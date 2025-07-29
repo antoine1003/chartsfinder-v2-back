@@ -7,22 +7,27 @@ use App\Repository\PresetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: PresetRepository::class)]
-class Preset implements  \JsonSerializable
+class Preset
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['preset:list', 'preset:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['preset:list', 'preset:detail'])]
     private ?string $name = null;
 
     /**
      * @var Collection<int, Chart>
      */
     #[ORM\ManyToMany(targetEntity: Chart::class, inversedBy: 'presets', cascade: ['persist'])]
+    #[Groups(['preset:detail'])]
     private Collection $charts;
 
     public function __construct()
@@ -79,20 +84,5 @@ class Preset implements  \JsonSerializable
         $presetDto->setCharts($this->getCharts()->map(fn(Chart $chart) => $chart->getId())->toArray());
 
         return $presetDto;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'name' => $this->getName(),
-            'charts' => $this->getCharts()->map(function(Chart $chart) {
-                    return [
-                        'id' => $chart->getId(),
-                        'name' => $chart->getName(),
-                        'type' => $chart->getType(),
-                    ];
-            })->toArray()
-        ];
     }
 }

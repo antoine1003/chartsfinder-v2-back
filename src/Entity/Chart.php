@@ -7,40 +7,49 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ChartRepository::class)]
 #[ORM\Table(name: 'chart', indexes: [
     new ORM\Index(name: 'chart_name_idx', columns: ['name'])
 ])]
-class Chart implements \JsonSerializable
+class Chart
 {
 
     use TimestampableEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $url = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $airac = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'charts')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?Airport $airport = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $runway = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $subType = null;
 
     /**
@@ -107,19 +116,6 @@ class Chart implements \JsonSerializable
         $this->type = $type;
 
         return $this;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'name' => $this->getName(),
-            'url' => $this->getUrl(),
-            'airac' => $this->getAirac(),
-            'type' => $this->getType(),
-            'createdAt' => $this->getCreatedAt()?->format('Y-m-d H:i:s'),
-            'updatedAt' => $this->getUpdatedAt()?->format('Y-m-d H:i:s'),
-        ];
     }
 
     public function getAirport(): ?Airport

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 
 abstract class AbstractRestController extends AbstractController
 {
@@ -19,27 +20,36 @@ abstract class AbstractRestController extends AbstractController
     {
     }
 
+    abstract function getGroupPrefix(): string;
+
 
     #[Route(path: '/{id}', name: '_get_one', requirements: ['id' => '\d+'], methods: ['GET'])]
-    public function getItem(int $id): JsonResponse
+    public function getItem(int $id, SerializerInterface $serializer): JsonResponse
     {
         $item = $this->service->find($id);
         if (!$item) {
             return new JsonResponse(['error' => 'Item not found'], Response::HTTP_NOT_FOUND);
         }
-        return $this->json($item);
+
+        $json = $serializer->serialize($item, 'json', ['groups' => $this->getGroupPrefix() . ':detail']);
+
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
     #[Route(path: '', name: 'get_all', methods: ['GET'])]
-    public function getAllItems(): JsonResponse
+    public function getAllItems(SerializerInterface $serializer): JsonResponse
     {
         $items = $this->service->findAll();
-        return $this->json($items);
+
+        $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
+
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
     #[Route(path: '/by', name: '_find_by', methods: ['POST'])]
     public function by(
         Request $request,
+        SerializerInterface $serializer
     ): JsonResponse
     {
         $criteria = $request->toArray();
@@ -47,7 +57,10 @@ abstract class AbstractRestController extends AbstractController
             return $this->json(['error' => 'No criteria provided'], Response::HTTP_BAD_REQUEST);
         }
         $items = $this->service->findBy($criteria);
-        return $this->json($items);
+
+        $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
+
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
     #[Route(path: '/search', name: '_search', methods: ['POST'])]

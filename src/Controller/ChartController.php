@@ -19,4 +19,9 @@ class ChartController extends AbstractRestController
     {
         parent::__construct($service);
     }
+
+    function getGroupPrefix(): string
+    {
+        return 'chart';
+    }
 }
