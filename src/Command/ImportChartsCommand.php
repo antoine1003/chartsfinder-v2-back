@@ -9,6 +9,7 @@ use App\Entity\Enum\ChartTypeEnum;
 use App\Entity\Runway;
 use App\Repository\AirportRepository;
 use App\Repository\ChartRepository;
+use App\Repository\RunwayRepository;
 use App\Service\AirportRestService;
 use App\Service\ChartRestService;
 use CobaltGrid\AIRACCalculator\AIRACCycle;
@@ -32,6 +33,7 @@ class ImportChartsCommand extends Command
     public function __construct(
         private readonly AirportRepository      $airportRepository,
         private readonly ChartRepository        $chartRepository,
+        private readonly RunwayRepository       $runwayRepository,
         private readonly EntityManagerInterface $entityManager,
     )
     {
@@ -110,6 +112,9 @@ class ImportChartsCommand extends Command
 
                 $airacCycle = $this->currentAirac->getCycleCode();
 
+                /**
+                 * @var Chart $chartEntity
+                 */
                 $chartEntity = $this->chartRepository->findOneBy([
                     'name' => $chartName,
                     'airport' => $airportEntity
@@ -119,14 +124,20 @@ class ImportChartsCommand extends Command
                     $chartEntity = new Chart();
                 }
 
+
                 $chartEntity->setName($chartName)
                     ->setAirport($airportEntity)
                     ->setUrl($chartUrl)
                     ->setAirac($airacCycle)
                     ->setType($chartData['type'])
-                    ->setRunway($chartData['runway'])
                     ->setSubType($chartData['subtype']);
 
+                $runwaysEntity = $this->runwayRepository->findByIdentLike($chartData['runway'], $airportEntity,);
+                if ($runwaysEntity) {
+                    foreach ($runwaysEntity as $runwayEntity) {
+                        $chartEntity->addRunway($runwayEntity);
+                    }
+                }
 
                 if (is_null($chartEntity->getId())) {
                     $this->entityManager->persist($chartEntity);

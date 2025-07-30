@@ -65,11 +65,14 @@ abstract class AbstractRestController extends AbstractController
 
     #[Route(path: '/search', name: '_search', methods: ['POST'])]
     public function searchItems(
-        #[MapRequestPayload] SearchCriteriaDto $searchCriteriaDto
+        #[MapRequestPayload] SearchCriteriaDto $searchCriteriaDto,
+        SerializerInterface $serializer
     ): JsonResponse
     {
         $items = $this->service->search($searchCriteriaDto);
-        return $this->json($items);
+
+        $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
+        return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
     #[Route(path: '', name: 'create_item', methods: ['POST'])]

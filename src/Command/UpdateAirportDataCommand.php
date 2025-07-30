@@ -3,8 +3,9 @@
 namespace App\Command;
 
 use App\Entity\Airport;
-use App\Entity\Country;
 use App\Entity\Runway;
+use App\Repository\AirportRepository;
+use App\Repository\RunwayRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,6 +22,9 @@ class UpdateAirportDataCommand extends Command
     private string $rootResourcePath = __DIR__ . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR;
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly AirportRepository $airportRepository,
+        private readonly RunwayRepository $runwayRepository,
+
     ) {
         parent::__construct();
     }
@@ -41,7 +45,6 @@ class UpdateAirportDataCommand extends Command
         $io->text('Removing existing countries, airports, and runways...');
         $this->entityManager->createQuery('DELETE FROM App\Entity\Runway')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Airport')->execute();
-        $this->entityManager->createQuery('DELETE FROM App\Entity\Country')->execute();
         $io->text('Existing data removed successfully.');
 
         $io->section('Importing new data');
@@ -49,16 +52,8 @@ class UpdateAirportDataCommand extends Command
         $start = microtime(true);
 
         // Import new data
-        $io->text('Importing countries...');
-        $this->importCountries($io);
-        $this->entityManager->flush();
-
         $io->text('Importing airports...');
         $this->importAirports($io);
-        $this->entityManager->flush();
-
-        $io->text('Importing runways...');
-        $this->importRunways($io);
         $this->entityManager->flush();
 
         $end = microtime(true);
@@ -68,121 +63,70 @@ class UpdateAirportDataCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function importCountries(SymfonyStyle $io): void
-    {
-        $path = $this->rootResourcePath . 'countries.csv';
-        if (!file_exists($path)) {
-            throw new \RuntimeException("File not found: $path");
-        }
-
-        $file = fopen($path, 'r');
-        fgetcsv($file); // skip header
-
-        while (($row = fgetcsv($file)) !== false) {
-            [$id, $code, $name, $continent, $wikipediaLink, $keywords] = $row;
-
-            $country = new Country();
-            $country->setCode($code);
-            $country->setName($name);
-            $country->setContinent($continent);
-            $country->setWikipediaLink($wikipediaLink);
-            $country->setKeywords($keywords ?: null);
-            $io->text(sprintf('Importing country: %s (%s)', $country->getName(), $country->getCode()));
-
-            $this->entityManager->persist($country);
-        }
-
-        fclose($file);
-    }
-
     private function importAirports(SymfonyStyle $io): void
     {
-        $path = $this->rootResourcePath . 'airports.json';
+        $path = $this->rootResourcePath . 'Airports.txt';
 
         if (!file_exists($path)) {
             throw new \RuntimeException("File not found: $path");
         }
+        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $nbAirports = 0;
+        $nbRunways = 0;
+        foreach ($lines as $line) {
+            $parts = str_getcsv($line);
+            $type = $parts[0];
 
-        $file = fopen($path, 'r');
-        $data = fread($file, filesize($path));
-        fclose($file);
+            switch ($type) {
+                case 'A':
+                    // Extract airport
+                    $ident = $parts[1];
+                    $currentAirport = $this->airportRepository->findOneBy(['icaoCode' => $ident]);
+                    if (!$currentAirport) {
+                        // Skip or log warning
+                        $currentAirport = null;
+                        $io->warning("Airport with ICAO code $ident not found. Creating new airport.");
+                        $currentAirport = new Airport();
+                        $currentAirport->setIcaoCode($ident);
+                        $currentAirport->setName($parts[2] ?? null);
+                        $currentAirport->setLatitudeDeg((float)$parts[3]);
+                        $currentAirport->setLongitudeDeg((float)$parts[4]);
+                        $currentAirport->setElevationFt((float)($parts[5] ?? 0));
+                        $this->entityManager->persist($currentAirport);
+                        $nbAirports++;
+                    }
 
-        $data = json_decode($data, true);
-        foreach ($data as $k => $v) {
-            $airport = $v;
-            $isoCountry = $airport['country'];
+                    break;
 
-            $country = $this->entityManager->getRepository(Country::class)->findOneBy(['code' => $isoCountry]);
-            if (!$country) {
-                continue; // skip if country missing
+                case 'R':
+                    if (!$currentAirport) {
+                        // Skip: runway without airport context
+                        continue 2;
+                    }
+
+                    // Extract and create Runway, link to $currentAirport
+                    $runway = new Runway();
+                    $runway->setAirport($currentAirport);
+                    $runway->setIdent($parts[1]);
+                    $runway->setHeading((int)$parts[2]);
+                    $runway->setLengthFt((int)$parts[3]);
+                    $runway->setWidthFt((int)$parts[4]);
+                    $ilsAvailable = $parts[5] === '1';
+                    $runway->setIlsAvailable($ilsAvailable);
+                    $runway->setIlsFrequency($ilsAvailable ? $parts[6] : null);
+                    $runway->setIlsQdm($ilsAvailable ? $parts[7] : null);
+                    $runway->setSurface(null); // not provided
+                    $runway->setLat((float)$parts[8]);
+                    $runway->setLon((float)$parts[9]);
+                    $runway->setElevationFt((float)$parts[10]);
+                    $runway->setSurface((float)$parts[13] ?? null);
+                    $this->entityManager->persist($runway);
+                    $nbRunways++;
+                    break;
             }
-
-            $airportEntity = new Airport();
-            $airportEntity->setType($airport['type']);
-            $airportEntity->setName($airport['name']);
-            $airportEntity->setLatitudeDeg((float) $airport['lat']);
-            $airportEntity->setLongitudeDeg((float) $airport['lon']);
-            $airportEntity->setElevationFt($airport['elevation'] !== '' ? (float) $airport['elevation'] : null);
-            $airportEntity->setIcaoCode($airport['icao'] ?: null);
-            $airportEntity->setIataCode($airport['iata'] ?: null);
-            $airportEntity->setCountry($country);
-
-            $this->entityManager->persist($airportEntity);
-            $io->text(sprintf('Importing airport: %s (%s)', $airportEntity->getName(), $airportEntity->getIcaoCode()));
         }
-    }
-
-    private function importRunways(SymfonyStyle $io): void
-    {
-        $path = $this->rootResourcePath . 'runways.csv';
-        if (!file_exists($path)) {
-            throw new \RuntimeException("File not found: $path");
-        }
-
-        $file = fopen($path, 'r');
-        fgetcsv($file); // skip header
-
-        while (($row = fgetcsv($file)) !== false) {
-            [$id, $airportRef, $airportIdent, $length, $width, $surface, $lighted, $closed,
-                $leIdent, $leLat, $leLon, $leElev, $leHeading, $leDisplaced,
-                $heIdent, $heLat, $heLon, $heElev, $heHeading, $heDisplaced] = $row;
-
-            // remove " from the beginning and end of the airportIdent
-            $airportIdent =  trim($airportIdent, '"');
-            if (!str_starts_with($airportIdent, 'LF') && !str_starts_with($airportIdent, 'TF')) {
-                continue;
-            }
-            $io->text("Processing runway for airport: $airportIdent");
-
-            $airport = $this->entityManager->getRepository(Airport::class)->findOneBy(['icaoCode' => $airportIdent]);
-            if (!$airport) {
-                continue;
-            }
-
-            $runway = new Runway();
-            $runway->setAirport($airport);
-            $runway->setLengthFt($length !== '' ? (int) $length : null);
-            $runway->setWidthFt($width !== '' ? (int) $width : null);
-            $runway->setSurface($surface ?: null);
-            $runway->setLighted((bool) $lighted);
-            $runway->setClosed((bool) $closed);
-            $runway->setLeIdent($leIdent ?: null);
-            $runway->setLeLatitudeDeg($leLat !== '' ? (float) $leLat : null);
-            $runway->setLeLongitudeDeg($leLon !== '' ? (float) $leLon : null);
-            $runway->setLeElevationFt($leElev !== '' ? (float) $leElev : null);
-            $runway->setLeHeadingDegT($leHeading !== '' ? (float) $leHeading : null);
-            $runway->setLeDisplacedThresholdFt($leDisplaced !== '' ? (float) $leDisplaced : null);
-            $runway->setHeIdent($heIdent ?: null);
-            $runway->setHeLatitudeDeg($heLat !== '' ? (float) $heLat : null);
-            $runway->setHeLongitudeDeg($heLon !== '' ? (float) $heLon : null);
-            $runway->setHeElevationFt($heElev !== '' ? (float) $heElev : null);
-            $runway->setHeHeadingDegT($heHeading !== '' ? (float) $heHeading : null);
-            $runway->setHeDisplacedThresholdFt($heDisplaced !== '' ? (float) $heDisplaced : null);
-
-            $this->entityManager->persist($runway);
-            $io->text(sprintf('Importing runway: %s (%s)', $runway->getLeIdent(), $airport->getIcaoCode()));
-        }
-
-        fclose($file);
+        $io->text('Airports imported successfully.');
+        $io->text(sprintf('Total airports: %d, Total runways: %d', $nbAirports, $nbRunways));
+        $this->entityManager->flush();
     }
 }

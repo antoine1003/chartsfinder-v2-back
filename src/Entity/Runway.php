@@ -3,7 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\RunwayRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RunwayRepository::class)]
 class Runway
@@ -11,61 +14,68 @@ class Runway
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['preset:detail', 'airport:detail', 'runway:detail'])]
     private int $id;
 
     #[ORM\ManyToOne(targetEntity: Airport::class)]
     private Airport $airport;
 
     #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
     private ?int $lengthFt = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
     private ?int $widthFt = null;
 
     #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
     private ?string $surface = null;
 
-    #[ORM\Column(type: 'boolean')]
-    private bool $lighted;
 
-    #[ORM\Column(type: 'boolean')]
-    private bool $closed;
+    #[ORM\Column(length: 3, nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
+    private ?int $heading = null;
 
-    #[ORM\Column(length: 10, nullable: true)]
-    private ?string $leIdent = null;
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
+    private ?bool $ilsAvailable = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $leLatitudeDeg = null;
+    #[ORM\Column(type: 'string', nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
+    private ?string $ilsFrequency = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $leLongitudeDeg = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $leElevationFt = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $leHeadingDegT = null;
-
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $leDisplacedThresholdFt = null;
+    #[ORM\Column(type: 'integer', nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
+    private ?int $ilsQdm = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    private ?string $heIdent = null;
+    #[Groups(['preset:detail', 'airport:detail'])]
+    private ?string $ident = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $heLatitudeDeg = null;
+    #[Groups(['runway:detail'])]
+    private ?float $lat = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $heLongitudeDeg = null;
+    #[Groups(['runway:detail'])]
+    private ?float $lon = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $heElevationFt = null;
+    #[Groups(['runway:detail'])]
+    private ?float $elevationFt = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $heHeadingDegT = null;
+    /**
+     * @var Collection<int, Chart>
+     */
+    #[ORM\ManyToMany(targetEntity: Chart::class, mappedBy: 'runways')]
+    private Collection $charts;
 
-    #[ORM\Column(type: 'float', nullable: true)]
-    private ?float $heDisplacedThresholdFt = null;
+    public function __construct()
+    {
+        $this->charts = new ArrayCollection();
+    }
+
 
 
     public function getId(): int
@@ -108,144 +118,46 @@ class Runway
         $this->surface = $surface;
     }
 
-    public function isLighted(): bool
+
+
+    public function getIdent(): ?string
     {
-        return $this->lighted;
+        return $this->ident;
     }
 
-    public function setLighted(bool $lighted): void
+    public function setIdent(?string $ident): void
     {
-        $this->lighted = $lighted;
+        $this->ident = $ident;
     }
 
-    public function isClosed(): bool
+    public function getLat(): ?float
     {
-        return $this->closed;
+        return $this->lat;
     }
 
-    public function setClosed(bool $closed): void
+    public function setLat(?float $lat): void
     {
-        $this->closed = $closed;
+        $this->lat = $lat;
     }
 
-    public function getLeIdent(): ?string
+    public function getLon(): ?float
     {
-        return $this->leIdent;
+        return $this->lon;
     }
 
-    public function setLeIdent(?string $leIdent): void
+    public function setLon(?float $lon): void
     {
-        $this->leIdent = $leIdent;
+        $this->lon = $lon;
     }
 
-    public function getLeLatitudeDeg(): ?float
+    public function getElevationFt(): ?float
     {
-        return $this->leLatitudeDeg;
+        return $this->elevationFt;
     }
 
-    public function setLeLatitudeDeg(?float $leLatitudeDeg): void
+    public function setElevationFt(?float $elevationFt): void
     {
-        $this->leLatitudeDeg = $leLatitudeDeg;
-    }
-
-    public function getLeLongitudeDeg(): ?float
-    {
-        return $this->leLongitudeDeg;
-    }
-
-    public function setLeLongitudeDeg(?float $leLongitudeDeg): void
-    {
-        $this->leLongitudeDeg = $leLongitudeDeg;
-    }
-
-    public function getLeElevationFt(): ?float
-    {
-        return $this->leElevationFt;
-    }
-
-    public function setLeElevationFt(?float $leElevationFt): void
-    {
-        $this->leElevationFt = $leElevationFt;
-    }
-
-    public function getLeHeadingDegT(): ?float
-    {
-        return $this->leHeadingDegT;
-    }
-
-    public function setLeHeadingDegT(?float $leHeadingDegT): void
-    {
-        $this->leHeadingDegT = $leHeadingDegT;
-    }
-
-    public function getLeDisplacedThresholdFt(): ?float
-    {
-        return $this->leDisplacedThresholdFt;
-    }
-
-    public function setLeDisplacedThresholdFt(?float $leDisplacedThresholdFt): void
-    {
-        $this->leDisplacedThresholdFt = $leDisplacedThresholdFt;
-    }
-
-    public function getHeIdent(): ?string
-    {
-        return $this->heIdent;
-    }
-
-    public function setHeIdent(?string $heIdent): void
-    {
-        $this->heIdent = $heIdent;
-    }
-
-    public function getHeLatitudeDeg(): ?float
-    {
-        return $this->heLatitudeDeg;
-    }
-
-    public function setHeLatitudeDeg(?float $heLatitudeDeg): void
-    {
-        $this->heLatitudeDeg = $heLatitudeDeg;
-    }
-
-    public function getHeLongitudeDeg(): ?float
-    {
-        return $this->heLongitudeDeg;
-    }
-
-    public function setHeLongitudeDeg(?float $heLongitudeDeg): void
-    {
-        $this->heLongitudeDeg = $heLongitudeDeg;
-    }
-
-    public function getHeElevationFt(): ?float
-    {
-        return $this->heElevationFt;
-    }
-
-    public function setHeElevationFt(?float $heElevationFt): void
-    {
-        $this->heElevationFt = $heElevationFt;
-    }
-
-    public function getHeHeadingDegT(): ?float
-    {
-        return $this->heHeadingDegT;
-    }
-
-    public function setHeHeadingDegT(?float $heHeadingDegT): void
-    {
-        $this->heHeadingDegT = $heHeadingDegT;
-    }
-
-    public function getHeDisplacedThresholdFt(): ?float
-    {
-        return $this->heDisplacedThresholdFt;
-    }
-
-    public function setHeDisplacedThresholdFt(?float $heDisplacedThresholdFt): void
-    {
-        $this->heDisplacedThresholdFt = $heDisplacedThresholdFt;
+        $this->elevationFt = $elevationFt;
     }
 
     public function getAirport(): Airport
@@ -256,5 +168,73 @@ class Runway
     public function setAirport(Airport $airport): void
     {
         $this->airport = $airport;
+    }
+
+
+    public function getHeading(): ?int
+    {
+        return $this->heading;
+    }
+
+    public function setHeading(?int $heading): void
+    {
+        $this->heading = $heading;
+    }
+
+    public function getIlsAvailable(): ?bool
+    {
+        return $this->ilsAvailable;
+    }
+
+    public function setIlsAvailable(?bool $ilsAvailable): void
+    {
+        $this->ilsAvailable = $ilsAvailable;
+    }
+
+    public function getIlsFrequency(): ?string
+    {
+        return $this->ilsFrequency;
+    }
+
+    public function setIlsFrequency(?string $ilsFrequency): void
+    {
+        $this->ilsFrequency = $ilsFrequency;
+    }
+
+    public function getIlsQdm(): ?int
+    {
+        return $this->ilsQdm;
+    }
+
+    public function setIlsQdm(?int $ilsQdm): void
+    {
+        $this->ilsQdm = $ilsQdm;
+    }
+
+    /**
+     * @return Collection<int, Chart>
+     */
+    public function getCharts(): Collection
+    {
+        return $this->charts;
+    }
+
+    public function addChart(Chart $chart): static
+    {
+        if (!$this->charts->contains($chart)) {
+            $this->charts->add($chart);
+            $chart->addRunway($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChart(Chart $chart): static
+    {
+        if ($this->charts->removeElement($chart)) {
+            $chart->removeRunway($this);
+        }
+
+        return $this;
     }
 }

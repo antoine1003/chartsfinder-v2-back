@@ -6,23 +6,23 @@ use App\Repository\AirportRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AirportRepository::class)]
 #[ORM\Table(name: 'airport', indexes: [
     new ORM\Index(name: 'icao_code_idx', columns: ['icao_code']),
     new ORM\Index(name: 'iata_code_idx', columns: ['iata_code']),
 ])]
-class Airport implements \JsonSerializable
+class Airport
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private int $id;
 
     #[ORM\Column(length: 255)]
-    private string $type;
-
-    #[ORM\Column(length: 255)]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private string $name;
 
     #[ORM\Column(type: 'float')]
@@ -34,14 +34,9 @@ class Airport implements \JsonSerializable
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $elevationFt = null;
 
-    #[ORM\ManyToOne(targetEntity: Country::class)]
-    private Country $country;
-
     #[ORM\Column(length: 10, nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?string $icaoCode = null;
-
-    #[ORM\Column(length: 10, nullable: true)]
-    private ?string $iataCode = null;
 
     /**
      * @var Collection<int, Chart>
@@ -53,6 +48,7 @@ class Airport implements \JsonSerializable
      * @var Collection<int, Runway>
      */
     #[ORM\OneToMany(targetEntity: Runway::class, mappedBy: 'airport', orphanRemoval: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
     private Collection $runways;
 
     public function __construct()
@@ -70,16 +66,6 @@ class Airport implements \JsonSerializable
     public function setId(int $id): void
     {
         $this->id = $id;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    public function setType(string $type): void
-    {
-        $this->type = $type;
     }
 
     public function getName(): string
@@ -136,40 +122,6 @@ class Airport implements \JsonSerializable
         return $this;
     }
 
-    public function getIataCode(): ?string
-    {
-        return $this->iataCode;
-    }
-
-    public function setIataCode(?string $iataCode): void
-    {
-        $this->iataCode = $iataCode;
-    }
-
-    public function getCountry(): Country
-    {
-        return $this->country;
-    }
-
-    public function setCountry(Country $country): void
-    {
-        $this->country = $country;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'type' => $this->getType(),
-            'name' => $this->getName(),
-            'latitudeDeg' => $this->getLatitudeDeg(),
-            'longitudeDeg' => $this->getLongitudeDeg(),
-            'elevationFt' => $this->getElevationFt(),
-            'country' => $this->getCountry()->getName(), // Assuming Country entity has a getName() method
-            'icaoCode' => $this->getIcaoCode(),
-            'iataCode' => $this->getIataCode(),
-        ];
-    }
 
     /**
      * @return Collection<int, Chart>

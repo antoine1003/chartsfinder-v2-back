@@ -44,9 +44,6 @@ class Chart
     #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?Airport $airport = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
-    private ?string $runway = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
@@ -58,11 +55,18 @@ class Chart
     #[ORM\ManyToMany(targetEntity: Preset::class, mappedBy: 'charts', cascade: ['persist'])]
     private Collection $presets;
 
+    /**
+     * @var Collection<int, Runway>
+     */
+    #[ORM\ManyToMany(targetEntity: Runway::class, inversedBy: 'charts')]
+    private Collection $runways;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->presets = new ArrayCollection();
+        $this->runways = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -142,17 +146,6 @@ class Chart
         return $this;
     }
 
-    public function getRunway(): ?string
-    {
-        return $this->runway;
-    }
-
-    public function setRunway(?string $runway): static
-    {
-        $this->runway = $runway;
-        return $this;
-    }
-
     /**
      * @return Collection<int, Preset>
      */
@@ -176,6 +169,30 @@ class Chart
         if ($this->presets->removeElement($preset)) {
             $preset->removeChart($this);
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Runway>
+     */
+    public function getRunways(): Collection
+    {
+        return $this->runways;
+    }
+
+    public function addRunway(Runway $runway): static
+    {
+        if (!$this->runways->contains($runway)) {
+            $this->runways->add($runway);
+        }
+
+        return $this;
+    }
+
+    public function removeRunway(Runway $runway): static
+    {
+        $this->runways->removeElement($runway);
 
         return $this;
     }
