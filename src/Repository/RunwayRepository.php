@@ -25,12 +25,27 @@ class RunwayRepository extends ServiceEntityRepository
         if (empty($ident)) {
             return [];
         }
-        return $this->createQueryBuilder('r')
+        // Treating if two runways are given like 03-21
+        if (str_contains($ident, '-')) {
+            $idents = explode('-', $ident);
+        }
+        else {
+            $idents = [$ident];
+        }
+        $qb = $this->createQueryBuilder('r')
             ->where('r.airport = :airport')
-            ->andWhere('r.ident LIKE :ident')
-            ->setParameter('airport', $airport)
-            ->setParameter('ident', $ident . '%')
-            ->getQuery()
-            ->getResult();
+            ->setParameter('airport', $airport);
+
+        $condition = $qb->expr()->orX();
+
+        foreach ($idents as $i => $rwy) {
+            $condition->add($qb->expr()->like('r.ident', ':ident' . $i));
+            $qb->setParameter('ident' . $i, $rwy . '%');
+        }
+
+
+        $qb->andWhere($condition);
+
+        return $qb->getQuery()->getResult();
     }
 }

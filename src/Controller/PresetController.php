@@ -38,7 +38,8 @@ class PresetController extends AbstractController
     #[Route(path: '/{id}', name: '_one', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function getOne(Preset $preset, SerializerInterface $serializer): JsonResponse
     {
-        $json = $serializer->serialize($preset, 'json', ['groups' => ['preset:detail']]);
+        $items = $this->presetService->formatByAirport($preset);
+        $json = $serializer->serialize($items, 'json', ['groups' => ['preset:detail']]);
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
@@ -46,9 +47,13 @@ class PresetController extends AbstractController
     #[Route(path: '/mine', name: '_get_mine', methods: ['GET'])]
     public function getMine(SerializerInterface $serializer): JsonResponse
     {
-        $items = $this->presetService->findMine();
+        $presets = $this->presetService->findMine();
+        $result = [];
+        foreach ($presets as $preset) {
+            $result[] = $this->presetService->formatByAirport($preset);
+        }
 
-        $json = $serializer->serialize($items, 'json', ['groups' => ['preset:detail']]);
+        $json = $serializer->serialize($result, 'json', ['groups' => ['preset:detail']]);
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }

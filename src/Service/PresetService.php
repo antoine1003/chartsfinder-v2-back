@@ -9,6 +9,7 @@ use App\Entity\Preset;
 use App\Repository\AirportRepository;
 use App\Repository\ChartRepository;
 use App\Repository\PresetRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
@@ -30,6 +31,35 @@ class PresetService
     public function findAll(): array
     {
         return $this->presetRepository->findAll();
+    }
+
+    public function formatByAirport(Preset $preset): array
+    {
+        $formatted = [
+            'id' => $preset->getId(),
+            'name' => $preset->getName(),
+            'airports' => new ArrayCollection(),
+        ];
+
+        // I want to keep all as entities, not just ids
+        foreach ($preset->getCharts() as $chart) {
+            $airport = clone $chart->getAirport();
+            /**
+             * @var ArrayCollection<Airport> $airportsInResult
+             */
+            $airportsInResult = $formatted['airports'];
+            $airportInResult = $airportsInResult->filter(fn(Airport $a) => $a->getId() === $airport->getId())->first();
+            if ($airportInResult) {
+                // If the airport already exists in the result, add the chart to it
+                $airportInResult->addChart($chart);
+            } else {
+                // If the airport does not exist, create a new entry
+                $airport->addChart($chart);
+                $formatted['airports']->add($airport);
+            }
+        }
+
+        return $formatted;
     }
 
     public function createOrUpdate(PresetDto $presetDto)

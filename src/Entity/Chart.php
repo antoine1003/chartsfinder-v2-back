@@ -41,7 +41,6 @@ class Chart
 
     #[ORM\ManyToOne(inversedBy: 'charts')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?Airport $airport = null;
 
 
@@ -59,6 +58,7 @@ class Chart
      * @var Collection<int, Runway>
      */
     #[ORM\ManyToMany(targetEntity: Runway::class, inversedBy: 'charts')]
+    #[Groups(['chart:detail', 'preset:detail'])]
     private Collection $runways;
 
     public function __construct()

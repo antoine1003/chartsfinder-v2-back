@@ -132,7 +132,7 @@ class ImportChartsCommand extends Command
                     ->setType($chartData['type'])
                     ->setSubType($chartData['subtype']);
 
-                $runwaysEntity = $this->runwayRepository->findByIdentLike($chartData['runway'], $airportEntity,);
+                $runwaysEntity = $this->runwayRepository->findByIdentLike($chartData['runway'], $airportEntity);
                 if ($runwaysEntity) {
                     foreach ($runwaysEntity as $runwayEntity) {
                         $chartEntity->addRunway($runwayEntity);

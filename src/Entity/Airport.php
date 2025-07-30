@@ -10,8 +10,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AirportRepository::class)]
 #[ORM\Table(name: 'airport', indexes: [
-    new ORM\Index(name: 'icao_code_idx', columns: ['icao_code']),
-    new ORM\Index(name: 'iata_code_idx', columns: ['iata_code']),
+    new ORM\Index(name: 'icao_code_idx', columns: ['icao_code'])
 ])]
 class Airport
 {
@@ -42,6 +41,7 @@ class Airport
      * @var Collection<int, Chart>
      */
     #[ORM\OneToMany(targetEntity: Chart::class, mappedBy: 'airport', orphanRemoval: true)]
+    #[Groups(['preset:detail', 'airport:detail'])]
     private Collection $charts;
 
     /**
@@ -56,6 +56,10 @@ class Airport
         $this->charts = new ArrayCollection();
     }
 
+    public function __clone(): void
+    {
+        $this->charts = new ArrayCollection();
+    }
 
 
     public function getId(): int
