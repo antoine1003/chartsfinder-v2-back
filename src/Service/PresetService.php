@@ -71,13 +71,14 @@ class PresetService
 
         if (!$preset) {
             $preset = new Preset();
-            $preset->setName($presetDto->getName());
-            /**
-             * @var User $user
-             */
-            $user = $this->security->getUser();
-            $preset->setUser($user);
         }
+
+        $preset->setName($presetDto->getName());
+        /**
+         * @var User $user
+         */
+        $user = $this->security->getUser();
+        $preset->setUser($user);
 
         $charts = $presetDto->getCharts();
         $oldCharts = $preset->getCharts()->map(fn(Chart $chart) => $chart->getId())->toArray();
