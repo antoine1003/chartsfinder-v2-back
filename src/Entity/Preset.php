@@ -30,6 +30,10 @@ class Preset
     #[Groups(['preset:detail'])]
     private Collection $charts;
 
+    #[ORM\ManyToOne(inversedBy: 'presets')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->charts = new ArrayCollection();
@@ -84,5 +88,17 @@ class Preset
         $presetDto->setCharts($this->getCharts()->map(fn(Chart $chart) => $chart->getId())->toArray());
 
         return $presetDto;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+
+        return $this;
     }
 }

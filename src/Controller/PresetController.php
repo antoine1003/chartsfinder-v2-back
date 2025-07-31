@@ -4,12 +4,17 @@ namespace App\Controller;
 
 use App\Dto\PresetDto;
 use App\Entity\Preset;
+use App\Entity\User;
+use App\Security\Voter\PresetVoter;
 use App\Service\PresetService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 #[Route(path: '/api/presets', name: 'presets')]
@@ -36,6 +41,7 @@ class PresetController extends AbstractController
     }
 
     #[Route(path: '/{id}', name: '_one', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[ISGranted(PresetVoter::VIEW, subject: 'preset')]
     public function getOne(Preset $preset, SerializerInterface $serializer): JsonResponse
     {
         $items = $this->presetService->formatByAirport($preset);
@@ -43,11 +49,17 @@ class PresetController extends AbstractController
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
-    // get all presets
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route(path: '/mine', name: '_get_mine', methods: ['GET'])]
-    public function getMine(SerializerInterface $serializer): JsonResponse
+    public function getMine(SerializerInterface $serializer, Security $security): JsonResponse
     {
-        $presets = $this->presetService->findMine();
+        /**
+         * @var User $user
+         */
+        $user = $security->getUser();
+        $presets = $user->getPresets();
         $result = [];
         foreach ($presets as $preset) {
             $result[] = $this->presetService->formatByAirport($preset);
@@ -59,7 +71,8 @@ class PresetController extends AbstractController
     }
 
     #[Route(path: '/{id}', name: '_delete', methods: ['DELETE'])]
-    public function delete(Preset $preset,): JsonResponse
+    #[ISGranted(PresetVoter::DELETE, subject: 'preset')]
+    public function delete(Preset $preset): JsonResponse
     {
         $this->presetService->delete($preset);
         return $this->json(null, Response::HTTP_NO_CONTENT);

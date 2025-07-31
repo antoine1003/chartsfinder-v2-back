@@ -215,8 +215,9 @@ class ImportChartsCommand extends Command
 
         // Recherche RWY dans les parties
         foreach ($parts as $index => $part) {
-            if (strpos($part, 'RWY') === 0) {
+            if (str_starts_with($part, 'RWY')) {
                 $runway = substr($part, 3); // Supprime "RWY"
+                // TODO: gérer les cas ou c'est RWY_21 et pas RWY21
                 // Vérifie s'il y a des sous-parties après RWY
                 $subtype = array_slice($parts, $index + 1);
                 break;

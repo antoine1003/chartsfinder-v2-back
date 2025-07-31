@@ -6,11 +6,13 @@ use App\Dto\PresetDto;
 use App\Entity\Airport;
 use App\Entity\Chart;
 use App\Entity\Preset;
+use App\Entity\User;
 use App\Repository\AirportRepository;
 use App\Repository\ChartRepository;
 use App\Repository\PresetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -22,6 +24,7 @@ class PresetService
         protected EntityManagerInterface $entityManager,
         private readonly PresetRepository $presetRepository,
         private readonly ChartRepository $chartRepository,
+        private readonly Security $security
     )
     {
     }
@@ -69,6 +72,11 @@ class PresetService
         if (!$preset) {
             $preset = new Preset();
             $preset->setName($presetDto->getName());
+            /**
+             * @var User $user
+             */
+            $user = $this->security->getUser();
+            $preset->setUser($user);
         }
 
         $charts = $presetDto->getCharts();
