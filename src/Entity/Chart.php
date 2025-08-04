@@ -49,12 +49,6 @@ class Chart
     private ?string $subType = null;
 
     /**
-     * @var Collection<int, Preset>
-     */
-    #[ORM\ManyToMany(targetEntity: Preset::class, mappedBy: 'charts', cascade: ['persist'])]
-    private Collection $presets;
-
-    /**
      * @var Collection<int, Runway>
      */
     #[ORM\ManyToMany(targetEntity: Runway::class, inversedBy: 'charts')]
@@ -146,32 +140,6 @@ class Chart
         return $this;
     }
 
-    /**
-     * @return Collection<int, Preset>
-     */
-    public function getPresets(): Collection
-    {
-        return $this->presets;
-    }
-
-    public function addPreset(Preset $preset): static
-    {
-        if (!$this->presets->contains($preset)) {
-            $this->presets->add($preset);
-            $preset->addChart($this);
-        }
-
-        return $this;
-    }
-
-    public function removePreset(Preset $preset): static
-    {
-        if ($this->presets->removeElement($preset)) {
-            $preset->removeChart($this);
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Runway>

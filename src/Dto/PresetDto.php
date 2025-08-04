@@ -21,7 +21,7 @@ class PresetDto implements \JsonSerializable
         new Assert\Type("integer"),
         new Assert\PositiveOrZero(),
     ])]
-    private ?array $charts = null;
+    private ?array $airports = null;
 
 
     public function getId(): ?int
@@ -44,14 +44,14 @@ class PresetDto implements \JsonSerializable
         $this->name = $name;
     }
 
-    public function getCharts(): ?array
+    public function getAirports(): ?array
     {
-        return $this->charts;
+        return $this->airports;
     }
 
-    public function setCharts(?array $charts): void
+    public function setAirports(?array $airports): void
     {
-        $this->charts = $charts;
+        $this->airports = $airports;
     }
 
     public function jsonSerialize(): array
@@ -59,7 +59,7 @@ class PresetDto implements \JsonSerializable
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'charts' => $this->charts,
+            'airports' => $this->airports,
         ];
     }
 }

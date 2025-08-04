@@ -51,9 +51,17 @@ class Airport
     #[Groups(['preset:detail', 'airport:detail'])]
     private Collection $runways;
 
+
+    /**
+     * @var Collection<int, Preset>
+     */
+    #[ORM\ManyToMany(targetEntity: Preset::class, mappedBy: 'charts', cascade: ['persist'])]
+    private Collection $presets;
+
     public function __construct()
     {
         $this->charts = new ArrayCollection();
+        $this->presets = new ArrayCollection();
     }
 
     public function __clone(): void
@@ -166,4 +174,32 @@ class Airport
     {
         $this->runways = $runways;
     }
+
+    /**
+     * @return Collection<int, Preset>
+     */
+    public function getPresets(): Collection
+    {
+        return $this->presets;
+    }
+
+    public function addPreset(Preset $preset): static
+    {
+        if (!$this->presets->contains($preset)) {
+            $this->presets->add($preset);
+            $preset->addAirport($this);
+        }
+
+        return $this;
+    }
+
+    public function removePreset(Preset $preset): static
+    {
+        if ($this->presets->removeElement($preset)) {
+            $preset->removeAirport($this);
+        }
+
+        return $this;
+    }
+
 }

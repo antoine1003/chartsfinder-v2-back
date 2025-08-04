@@ -31,6 +31,6 @@ readonly class MetarFetcherService
             }
         }
 
-        throw new \RuntimeException('All METAR sources failed.');
+        return '';
     }
 }

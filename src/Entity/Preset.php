@@ -24,11 +24,11 @@ class Preset
     private ?string $name = null;
 
     /**
-     * @var Collection<int, Chart>
+     * @var Collection<int, Airport>
      */
-    #[ORM\ManyToMany(targetEntity: Chart::class, inversedBy: 'presets', cascade: ['persist'])]
+    #[ORM\ManyToMany(targetEntity: Airport::class, inversedBy: 'airports', cascade: ['persist'])]
     #[Groups(['preset:detail'])]
-    private Collection $charts;
+    private Collection $airports;
 
     #[ORM\ManyToOne(inversedBy: 'presets')]
     #[ORM\JoinColumn(nullable: false)]
@@ -36,7 +36,7 @@ class Preset
 
     public function __construct()
     {
-        $this->charts = new ArrayCollection();
+        $this->airports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -57,37 +57,27 @@ class Preset
     }
 
     /**
-     * @return Collection<int, Chart>
+     * @return Collection<int, Airport>
      */
-    public function getCharts(): Collection
+    public function getAirports(): Collection
     {
-        return $this->charts;
+        return $this->airports;
     }
 
-    public function addChart(Chart $chart): static
+    public function addAirport(Airport $airport): static
     {
-        if (!$this->charts->contains($chart)) {
-            $this->charts->add($chart);
+        if (!$this->airports->contains($airport)) {
+            $this->airports->add($airport);
         }
 
         return $this;
     }
 
-    public function removeChart(Chart $chart): static
+    public function removeAirport(Airport $airport): static
     {
-        $this->charts->removeElement($chart);
+        $this->airports->removeElement($airport);
 
         return $this;
-    }
-
-    public function toDto(): PresetDto
-    {
-        $presetDto = new PresetDto();
-        $presetDto->setId($this->getId());
-        $presetDto->setName($this->getName());
-        $presetDto->setCharts($this->getCharts()->map(fn(Chart $chart) => $chart->getId())->toArray());
-
-        return $presetDto;
     }
 
     public function getUser(): ?User

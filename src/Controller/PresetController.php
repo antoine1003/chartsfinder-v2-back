@@ -44,8 +44,7 @@ class PresetController extends AbstractController
     #[ISGranted(PresetVoter::VIEW, subject: 'preset')]
     public function getOne(Preset $preset, SerializerInterface $serializer): JsonResponse
     {
-        $items = $this->presetService->formatByAirport($preset);
-        $json = $serializer->serialize($items, 'json', ['groups' => ['preset:detail']]);
+        $json = $serializer->serialize($preset, 'json', ['groups' => ['preset:detail']]);
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
@@ -60,12 +59,8 @@ class PresetController extends AbstractController
          */
         $user = $security->getUser();
         $presets = $user->getPresets();
-        $result = [];
-        foreach ($presets as $preset) {
-            $result[] = $this->presetService->formatByAirport($preset);
-        }
 
-        $json = $serializer->serialize($result, 'json', ['groups' => ['preset:detail']]);
+        $json = $serializer->serialize($presets, 'json', ['groups' => ['preset:detail']]);
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
