@@ -48,7 +48,7 @@ class Airport
      * @var Collection<int, Runway>
      */
     #[ORM\OneToMany(targetEntity: Runway::class, mappedBy: 'airport', orphanRemoval: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private Collection $runways;
 
 

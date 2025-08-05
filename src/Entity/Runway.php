@@ -14,43 +14,43 @@ class Runway
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['preset:detail', 'airport:detail', 'runway:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'runway:detail', 'airport:list'])]
     private int $id;
 
     #[ORM\ManyToOne(targetEntity: Airport::class)]
     private Airport $airport;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?int $lengthFt = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?int $widthFt = null;
 
     #[ORM\Column(length: 50, nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?string $surface = null;
 
 
     #[ORM\Column(length: 3, nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?int $heading = null;
 
     #[ORM\Column(type: 'boolean', nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?bool $ilsAvailable = null;
 
     #[ORM\Column(type: 'string', nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?string $ilsFrequency = null;
 
     #[ORM\Column(type: 'integer', nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?int $ilsQdm = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
     private ?string $ident = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
@@ -62,7 +62,7 @@ class Runway
     private ?float $lon = null;
 
     #[ORM\Column(type: 'float', nullable: true)]
-    #[Groups(['runway:detail'])]
+    #[Groups(['runway:detail', 'airport:list'])]
     private ?float $elevationFt = null;
 
     /**
