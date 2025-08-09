@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name: 'chart', indexes: [
     new ORM\Index(name: 'chart_name_idx', columns: ['name'])
 ])]
+#[ORM\UniqueConstraint(name: 'chart_airport_name_unique', columns: ['airport_id', 'name'])]
 class Chart
 {
 

@@ -5,7 +5,6 @@ namespace App\Command;
 use App\Entity\Airport;
 use App\Entity\Runway;
 use App\Repository\AirportRepository;
-use App\Repository\RunwayRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,8 +21,7 @@ class UpdateAirportDataCommand extends Command
     private string $rootResourcePath = __DIR__ . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR;
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly AirportRepository $airportRepository,
-        private readonly RunwayRepository $runwayRepository,
+        private readonly AirportRepository $airportRepository
 
     ) {
         parent::__construct();
@@ -38,18 +36,15 @@ class UpdateAirportDataCommand extends Command
             $io->warning('Operation cancelled by user.');
             return Command::FAILURE;
         }
-
+        $start = microtime(true);
         // Empty existing data
         $io->title('Updating Airport Data');
         $io->section('Emptying existing data');
         $io->text('Removing existing countries, airports, and runways...');
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Chart')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Runway')->execute();
         $this->entityManager->createQuery('DELETE FROM App\Entity\Airport')->execute();
         $io->text('Existing data removed successfully.');
-
-        $io->section('Importing new data');
-        $io->text('Importing countries, airports, and runways from CSV files...');
-        $start = microtime(true);
 
         // Import new data
         $io->text('Importing airports...');
