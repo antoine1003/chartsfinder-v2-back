@@ -2,9 +2,11 @@
 
 namespace App\Service;
 
+use App\Dto\SearchCriteriaDto;
 use App\Entity\Airport;
 use App\Repository\AirportRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
@@ -27,5 +29,26 @@ class AirportRestService extends AbstractRestService
             ['GET'],
             'This method is not allowed. Use search instead.'
         );
+    }
+
+
+    public function search(SearchCriteriaDto $searchCriteriaDto): array
+    {
+        $queryBuilder = $this->repository->createQueryBuilder('e');
+        $query = $searchCriteriaDto->getQuery();
+
+        foreach ($searchCriteriaDto->getProperties() as $property) {
+            if (!property_exists($this->entityClass, $property)) {
+                throw new BadRequestHttpException("Property '$property' does not exist in entity class '{$this->entityClass}'");
+            }
+
+            $queryBuilder->andWhere("e.$property LIKE :{$property}")
+                ->setParameter($property, '%' . $query . '%');
+        }
+
+        // And has charts associated
+        $queryBuilder->andWhere('e.charts IS NOT EMPTY');
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }
