@@ -48,7 +48,7 @@ jobs:
                     if grep -q "^MAILER_DSN=" .env.local; then
                         sed -i "s|^MAILER_DSN=.*|MAILER_DSN=${{ secrets.BREVO_API_KEY }}|" .env.local
                     else
-                        echo "brevo+api://MAILER_DSN=${{ secrets.BREVO_API_KEY }}@default" >> .env.local
+                        echo "MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default" >> .env.local
                     fi
                     echo "✅ Clé API mise à jour dans .env.local"
 
