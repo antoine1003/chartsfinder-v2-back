@@ -59,15 +59,19 @@ jobs:
                     echo "✅ Clé API mise à jour dans .env.local"
 
                     # Install vendors (plugins enabled for Flex)
-                    composer install --prefer-dist --no-dev --optimize-autoloader
+                     sudo -u www-data composer install --prefer-dist --no-dev --optimize-autoloader
 
                     # Generate compiled env (optional if you already rely on server vars)
-                    composer dump-env prod
+                     sudo -u www-data composer dump-env prod
 
                     # Clear & warmup cache in prod
-                    php bin/console cache:clear --env=prod --no-warmup
-                    php bin/console d:s:u -f
-                    php bin/console cache:warmup --env=prod
+                     sudo -u www-data php bin/console cache:clear --env=prod --no-warmup
+                     sudo -u www-data php bin/console d:s:u -f
+                     sudo -u www-data php bin/console cache:warmup --env=prod
+
+                    # Réattribuer tout le dossier à www-data
+                    sudo chown -R www-data:www-data /var/www/cf-v2/back
+                    echo "✅ Droits réattribués à www-data"
 
                     echo "✅ Déploiement terminé sur le serveur"
                     EOF
