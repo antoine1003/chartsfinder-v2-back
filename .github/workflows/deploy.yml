@@ -38,6 +38,14 @@ jobs:
                     export APP_ENV=prod APP_DEBUG=0
                     export COMPOSER_NO_INTERACTION=1
 
+                    # 🔹 Ajouter ou mettre à jour la clé API dans .env.local
+                    touch .env.local
+                    if grep -q "^MAILER_DSN=" .env.local; then
+                        sed -i "s|^MAILER_DSN=.*|MAILER_DSN=${{ secrets.BREVO_API_KEY }}|" .env.local
+                    else
+                        echo "brevo+api://MAILER_DSN=${{ secrets.BREVO_API_KEY }}@default" >> .env.local
+                    fi
+                    echo "✅ Clé API mise à jour dans .env.local"
 
                     # Install vendors (plugins enabled for Flex)
                     composer install --prefer-dist --no-dev --optimize-autoloader
@@ -50,7 +58,5 @@ jobs:
                     php bin/console d:s:u -f
                     php bin/console cache:warmup --env=prod
 
-                    # If we got here, everything worked
                     echo "✅ Déploiement terminé sur le serveur"
                     EOF
-
