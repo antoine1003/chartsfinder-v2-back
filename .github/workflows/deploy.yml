@@ -33,6 +33,10 @@ jobs:
                   ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
                   echo "✅ Permissions mises à jour"
                   EOF
+            -   name: Fix permissions
+                run: |
+                    ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+                    "sudo chown -R www-data:www-data /var/www/cf-v2/back"
 
             -   name: Run remote deployment commands
                 run: |
