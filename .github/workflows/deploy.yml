@@ -34,7 +34,8 @@ jobs:
                     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
                     cd /var/www/cf-v2/back
 
-                    composer install --no-interaction --prefer-dist
+                    composer dump-env prod
+                    composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
                     php bin/console cache:clear --env=prod
                     php bin/console d:s:u -f
 
