@@ -1,0 +1,42 @@
+name: Deploy to VPS
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v4
+
+            -   name: Set up SSH
+                run: |
+                    mkdir -p ~/.ssh
+                    echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+                    chmod 600 ~/.ssh/id_rsa
+                    ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+            -   name: Rsync files to VPS
+                run: |
+                    rsync -avz --delete \
+                      --exclude=".git*" \
+                      --exclude="node_modules" \
+                      --exclude="vendor" \
+                      ./ \
+                      ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
+
+            -   name: Run remote deployment commands
+                run: |
+                    ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                    cd /var/www/cf-v2/back
+
+                    composer install --no-interaction --prefer-dist
+                    php bin/console cache:clear --env=prod
+                    php bin/console d:s:u -f
+
+                    echo "✅ Déploiement terminé sur le serveur"
+                    EOF
