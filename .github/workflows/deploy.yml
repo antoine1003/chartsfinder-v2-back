@@ -35,11 +35,12 @@ jobs:
                     set -euo pipefail
                     cd /var/www/cf-v2/back
 
-                    # Ensure prod env; dump-env creates .env.local.php for runtime
                     export APP_ENV=prod APP_DEBUG=0
+                    export COMPOSER_NO_INTERACTION=1
+
 
                     # Install vendors (plugins enabled for Flex)
-                    composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+                    composer install --prefer-dist --no-dev --optimize-autoloader
 
                     # Generate compiled env (optional if you already rely on server vars)
                     composer dump-env prod
