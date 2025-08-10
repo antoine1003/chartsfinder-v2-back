@@ -38,14 +38,14 @@ jobs:
                     set -euo pipefail
                     cd /var/www/cf-v2/back
 
-                  # 1) Nettoyer le cache avant de modifier quoi que ce soit
+                    # 1) Nettoyer le cache avant de modifier quoi que ce soit
                     rm -rf var/cache/*
 
                     export APP_ENV=prod APP_DEBUG=0
                     export COMPOSER_NO_INTERACTION=1
                     umask 002
 
-                  # 2) Mettre à jour .env.local avec la clé API
+                    # 2) Mettre à jour .env.local avec la clé API
                     touch .env.local
                     if grep -q "^MAILER_DSN=" .env.local; then
                     sed -i "s|^MAILER_DSN=.*|MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default|" .env.local
@@ -54,13 +54,13 @@ jobs:
                     fi
                     echo "✅ Clé API mise à jour dans .env.local"
 
-                  # 3) Installer les dépendances
+                    # 3) Installer les dépendances
                     composer install --prefer-dist --no-dev --optimize-autoloader
 
-                  # 4) Compiler l'environnement
+                    # 4) Compiler l'environnement
                     composer dump-env prod
 
-                  # 5) Recréer le cache proprement
+                    # 5) Recréer le cache proprement
                     php bin/console cache:clear --env=prod --no-warmup
                     php bin/console d:s:u -f
                     php bin/console cache:warmup --env=prod
