@@ -1,5 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Redirige tout vers HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [L,R=301]
+
+    # Symfony: redirige tout vers index.php sauf si fichier/dossier existe
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [QSA,L]
