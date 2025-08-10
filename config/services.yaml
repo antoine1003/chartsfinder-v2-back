@@ -4,7 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-
+    frontendUrl: '%env(FRONTEND_URL)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -22,3 +22,7 @@ services:
         # services whose classes are instances of CustomInterface will be tagged automatically
         App\Service\Metar\Provider\MetarProviderInterface:
             tags: [ 'app.metar_provider' ]
+
+    App\Service\Security\CaptchaVerifier:
+        arguments:
+            $secret: '%env(TURNSTILE_SECRET)%'

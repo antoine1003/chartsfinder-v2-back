@@ -39,6 +39,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Preset::class, mappedBy: 'user', orphanRemoval: true)]
     private Collection $presets;
 
+    #[ORM\Column(options: ['default' => false])]
+    private ?bool $isEmailValidated = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $emailValidationToken = null;
+
     public function __construct()
     {
         $this->presets = new ArrayCollection();
@@ -151,6 +157,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $preset->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function isEmailValidated(): ?bool
+    {
+        return $this->isEmailValidated;
+    }
+
+    public function setIsEmailValidated(bool $isEmailValidated): static
+    {
+        $this->isEmailValidated = $isEmailValidated;
+
+        return $this;
+    }
+
+    public function getEmailValidationToken(): ?string
+    {
+        return $this->emailValidationToken;
+    }
+
+    public function setEmailValidationToken(?string $emailValidationToken): static
+    {
+        $this->emailValidationToken = $emailValidationToken;
 
         return $this;
     }
