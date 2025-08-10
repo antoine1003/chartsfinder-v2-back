@@ -20,31 +20,34 @@ jobs:
                     chmod 600 ~/.ssh/id_rsa
                     ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-            - name: Rsync files to VPS with correct user
-              run: |
-                    ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /var/www/cf-v2/back"
-                    rsync -avz --delete \
-                    --rsync-path="sudo -u www-data rsync" \
-                    --exclude=".git*" \
-                    --exclude="node_modules" \
-                    --exclude="vendor" \
-                    --exclude="var/cache" \
-                    --exclude="var/log" \
-                    ./ \
-                    ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
-            -   name: Fix permissions
+            -   name: Rsync files to VPS with correct user
                 run: |
-                    ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
-                    "sudo chown -R www-data:www-data /var/www/cf-v2/back"
+                    rsync -avz --delete \
+                      --exclude=".git*" \
+                      --exclude="node_modules" \
+                      --exclude="vendor" \
+                      --exclude="var/cache" \
+                      --exclude="var/log" \
+                      --chown=adautry:www-data \
+                      ./ \
+                      ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
 
             -   name: Run remote deployment commands
                 run: |
                     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
                     set -euo pipefail
                     cd /var/www/cf-v2/back
+                     # S'assurer que les droits restent propres après le rsync
+                    find . -type d -exec chmod 2775 {} \;
+                    find . -type f -exec chmod 664 {} \;
+
+                    # Var doit être écrivable par www-data (au cas où)
+                    setfacl -R -m u:www-data:rwx var || true
+                    setfacl -dR -m u:www-data:rwx var || true
 
                     export APP_ENV=prod APP_DEBUG=0
                     export COMPOSER_NO_INTERACTION=1
+                    umask 002
 
                     # 🔹 Ajouter ou mettre à jour la clé API dans .env.local
                     touch .env.local
@@ -62,9 +65,9 @@ jobs:
                     composer dump-env prod
 
                     # Clear & warmup cache in prod
-                    sudo -u www-data php bin/console cache:clear --env=prod --no-warmup
+                    php bin/console cache:clear --env=prod --no-warmup
                     php bin/console d:s:u -f
-                    sudo -u www-data php bin/console cache:warmup --env=prod
+                    php bin/console cache:warmup --env=prod
 
                     echo "✅ Déploiement terminé sur le serveur"
                     EOF
