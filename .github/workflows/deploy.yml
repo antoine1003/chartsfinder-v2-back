@@ -26,10 +26,11 @@ jobs:
                     --exclude=".git*" \
                     --exclude="node_modules" \
                     --exclude="vendor" \
+                    --exclude="var/cache" \
+                    --exclude="var/log" \
                     ./ \
                     ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
                   ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-                  sudo chown -R www-data:www-data /var/www/cf-v2/back
                   echo "✅ Permissions mises à jour"
                   EOF
 
