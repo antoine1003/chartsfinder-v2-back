@@ -37,41 +37,33 @@ jobs:
                     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
                     set -euo pipefail
                     cd /var/www/cf-v2/back
-                     # S'assurer que les droits restent propres après le rsync
-                    find . -type d -exec chmod 2775 {} \;
-                    find . -type f -exec chmod 664 {} \;
 
-                    # Var doit être écrivable par www-data (au cas où)
-                    setfacl -R -m u:www-data:rwx var || true
-                    setfacl -dR -m u:www-data:rwx var || true
+                  # 1) Nettoyer le cache avant de modifier quoi que ce soit
+                    rm -rf var/cache/*
 
                     export APP_ENV=prod APP_DEBUG=0
                     export COMPOSER_NO_INTERACTION=1
                     umask 002
 
-                    # 🔹 Ajouter ou mettre à jour la clé API dans .env.local
+                  # 2) Mettre à jour .env.local avec la clé API
                     touch .env.local
                     if grep -q "^MAILER_DSN=" .env.local; then
-                        sed -i "s|^MAILER_DSN=.*|MAILER_DSN=${{ secrets.BREVO_API_KEY }}|" .env.local
+                    sed -i "s|^MAILER_DSN=.*|MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default|" .env.local
                     else
-                        echo "MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default" >> .env.local
+                    echo "MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default" >> .env.local
                     fi
                     echo "✅ Clé API mise à jour dans .env.local"
 
-                    # Install vendors (plugins enabled for Flex)
-                     sudo -u www-data composer install --prefer-dist --no-dev --optimize-autoloader
+                  # 3) Installer les dépendances
+                    composer install --prefer-dist --no-dev --optimize-autoloader
 
-                    # Generate compiled env (optional if you already rely on server vars)
-                     sudo -u www-data composer dump-env prod
+                  # 4) Compiler l'environnement
+                    composer dump-env prod
 
-                    # Clear & warmup cache in prod
-                     sudo -u www-data php bin/console cache:clear --env=prod --no-warmup
-                     sudo -u www-data php bin/console d:s:u -f
-                     sudo -u www-data php bin/console cache:warmup --env=prod
-
-                    # Réattribuer tout le dossier à www-data
-                    sudo chown -R www-data:www-data /var/www/cf-v2/back
-                    echo "✅ Droits réattribués à www-data"
+                  # 5) Recréer le cache proprement
+                    php bin/console cache:clear --env=prod --no-warmup
+                    php bin/console d:s:u -f
+                    php bin/console cache:warmup --env=prod
 
                     echo "✅ Déploiement terminé sur le serveur"
                     EOF
