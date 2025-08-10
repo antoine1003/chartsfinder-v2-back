@@ -23,6 +23,7 @@ jobs:
             - name: Rsync files to VPS with correct user
               run: |
                   rsync -avz --delete \
+                    --rsync-path="sudo -u www-data rsync"
                     --exclude=".git*" \
                     --exclude="node_modules" \
                     --exclude="vendor" \
