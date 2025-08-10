@@ -36,7 +36,7 @@ readonly class SendEmailVerificationListener
         );
 
         $email = (new Email())
-            ->from('no-reply@yourdomain.com')
+            ->from('noreply@chartfinder.com')
             ->to($user->getEmail())
             ->addBcc("antoine.dautry@gmail.com")
             ->subject('Vérification de votre adresse e-mail')
