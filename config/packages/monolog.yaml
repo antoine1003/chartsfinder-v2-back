@@ -42,10 +42,9 @@ when@prod:
         handlers:
             main:
                 type: rotating_file
-                path: "%kernel.logs_dir%/logfile-%date%.log"
+                path: "%kernel.logs_dir%/kernel.environment%.log"
                 level: debug
                 max_files: 7           # Keep the last 7 days of logs
-                date_format: "Y-m-d"   # Filename includes current date
             console:
                 type: console
                 process_psr_3_messages: false

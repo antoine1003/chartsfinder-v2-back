@@ -32,12 +32,24 @@ jobs:
             -   name: Run remote deployment commands
                 run: |
                     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                    set -euo pipefail
                     cd /var/www/cf-v2/back
 
-                    composer dump-env prod
-                    composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
-                    php bin/console cache:clear --env=prod
-                    php bin/console d:s:u -f
+                  # Ensure prod env; dump-env creates .env.local.php for runtime
+                    export APP_ENV=prod APP_DEBUG=0
 
+                  # Install vendors (plugins enabled for Flex)
+                    composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+                  # Generate compiled env (optional if you already rely on server vars)
+                    composer dump-env prod
+
+                  # Clear & warmup cache in prod
+                    php bin/console cache:clear --env=prod --no-warmup
+                    php bin/console d:s:u -f
+                    php bin/console cache:warmup --env=prod
+
+                  # If we got here, everything worked
                     echo "✅ Déploiement terminé sur le serveur"
                     EOF
+
