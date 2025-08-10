@@ -20,14 +20,18 @@ jobs:
                     chmod 600 ~/.ssh/id_rsa
                     ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-            -   name: Rsync files to VPS
-                run: |
-                    rsync -avz --delete \
-                      --exclude=".git*" \
-                      --exclude="node_modules" \
-                      --exclude="vendor" \
-                      ./ \
-                      ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
+            - name: Rsync files to VPS with correct user
+              run: |
+                  rsync -avz --delete \
+                    --exclude=".git*" \
+                    --exclude="node_modules" \
+                    --exclude="vendor" \
+                    ./ \
+                    ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
+                  ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                  sudo chown -R www-data:www-data /var/www/cf-v2/back
+                  echo "✅ Permissions mises à jour"
+                  EOF
 
             -   name: Run remote deployment commands
                 run: |
