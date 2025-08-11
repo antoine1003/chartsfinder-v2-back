@@ -100,6 +100,11 @@ class AuthService
             $user->setIsEmailValidated(true);
             // set other profile fields if you want: name, avatar, etc.
             $this->entityManager->persist($user);
+
+            // Dispatch the user registered event
+            $event = new UserRegisteredEvent($user);
+            $this->dispatcher->dispatch($event, UserRegisteredEvent::NAME);
+
         } else {
             // ensure linkage for returning users
             if (method_exists($user, 'setGoogleId') && !$user->getGoogleId()) {
