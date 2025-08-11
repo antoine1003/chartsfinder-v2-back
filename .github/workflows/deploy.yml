@@ -45,14 +45,37 @@ jobs:
                     export COMPOSER_NO_INTERACTION=1
                     umask 002
 
-                    # 2) Mettre à jour .env.local avec la clé API
+
                     touch .env.local
+                    # MAILER_DSN
                     if grep -q "^MAILER_DSN=" .env.local; then
                     sed -i "s|^MAILER_DSN=.*|MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default|" .env.local
                     else
                     echo "MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default" >> .env.local
                     fi
-                    echo "✅ Clé API mise à jour dans .env.local"
+                    # JWT_PASSPHRASE
+                    if grep -q "^JWT_PASSPHRASE=" .env.local; then
+                    sed -i "s|^JWT_PASSPHRASE=.*|JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}|" .env.local
+                    else
+                    echo "JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}" >> .env.local
+                    fi
+
+                    echo "✅ .env.local mis à jour"
+
+                    # --- Génération des clés JWT (idempotent) ---
+                    if [ ! -f config/jwt/private.pem ] || [ ! -f config/jwt/public.pem ]; then
+                    mkdir -p config/jwt
+                    # Clé privée chiffrée avec le passphrase
+                    openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096 -pass pass:"${{ secrets.JWT_PASSPHRASE }}"
+                    # Clé publique dérivée
+                    openssl pkey -in config/jwt/private.pem -passin pass:"${{ secrets.JWT_PASSPHRASE }}" -out config/jwt/public.pem -pubout
+                    # Permissions
+                    chmod 600 config/jwt/private.pem
+                    chmod 644 config/jwt/public.pem
+                    echo "✅ Clés JWT générées"
+                    else
+                    echo "ℹ️  Clés JWT déjà présentes, pas de régénération"
+                    fi
 
                     # 3) Installer les dépendances
                     composer install --prefer-dist --no-dev --optimize-autoloader
