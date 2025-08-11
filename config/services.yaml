@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     frontendUrl: '%env(FRONTEND_URL)%'
+    google_oauth.client_id: '%env(GOOGLE_OAUTH_CLIENT_ID)%'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -26,3 +27,7 @@ services:
     App\Service\Security\CaptchaVerifier:
         arguments:
             $secret: '%env(TURNSTILE_SECRET)%'
+
+    App\Service\Security\GoogleIdTokenVerifier:
+        arguments:
+            $clientId: '%google_oauth.client_id%'
