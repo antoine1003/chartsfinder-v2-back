@@ -28,6 +28,7 @@ jobs:
                       --exclude="vendor" \
                       --exclude="var/cache" \
                       --exclude="var/log" \
+                      --exclude="config/jwt" \
                       --chown=adautry:www-data \
                       ./ \
                       ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
