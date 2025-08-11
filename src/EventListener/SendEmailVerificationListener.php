@@ -54,8 +54,7 @@ readonly class SendEmailVerificationListener
             // Send email to administrator for Google account registration
             $email = (new Email())
                 ->from('noreply@chartsfinder.com')
-                ->to($user->getEmail())
-                ->addBcc("antoine.dautry@gmail.com")
+                ->to("antoine.dautry@gmail.com")
                 ->subject('Nouvelle inscription avec un compte Google')
                 ->html(sprintf(
                     '<p>Hello 👋</p>
