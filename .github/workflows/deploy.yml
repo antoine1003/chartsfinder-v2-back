@@ -62,26 +62,15 @@ jobs:
 
                     echo "✅ .env.local mis à jour"
 
-                    # --- Génération des clés JWT (idempotent) ---
-                    if [ ! -f config/jwt/private.pem ] || [ ! -f config/jwt/public.pem ]; then
-                    mkdir -p config/jwt
-                    # Clé privée chiffrée avec le passphrase
-                    openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096 -pass pass:"${{ secrets.JWT_PASSPHRASE }}"
-                    # Clé publique dérivée
-                    openssl pkey -in config/jwt/private.pem -passin pass:"${{ secrets.JWT_PASSPHRASE }}" -out config/jwt/public.pem -pubout
-                    # Permissions
-                    chmod 600 config/jwt/private.pem
-                    chmod 644 config/jwt/public.pem
-                    echo "✅ Clés JWT générées"
-                    else
-                    echo "ℹ️  Clés JWT déjà présentes, pas de régénération"
-                    fi
-
                     # 3) Installer les dépendances
                     composer install --prefer-dist --no-dev --optimize-autoloader
 
                     # 4) Compiler l'environnement
                     composer dump-env prod
+
+                    # --- Générer les clés JWT si elles n'existent pas ---
+                    php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction
+                    echo "✅ Clés JWT vérifiées / générées"
 
                     # 5) Recréer le cache proprement
                     php bin/console cache:clear --env=prod --no-warmup
