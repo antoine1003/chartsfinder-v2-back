@@ -56,6 +56,10 @@ class Chart
     #[Groups(['chart:detail', 'preset:detail'])]
     private Collection $runways;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['chart:detail', 'preset:detail'])]
+    private ?bool $needProxy = true;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -162,6 +166,18 @@ class Chart
     public function removeRunway(Runway $runway): static
     {
         $this->runways->removeElement($runway);
+
+        return $this;
+    }
+
+    public function isNeedProxy(): ?bool
+    {
+        return $this->needProxy;
+    }
+
+    public function setNeedProxy(bool $needProxy): static
+    {
+        $this->needProxy = $needProxy;
 
         return $this;
     }
