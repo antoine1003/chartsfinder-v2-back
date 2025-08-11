@@ -41,9 +41,16 @@ class AirportRestService extends AbstractRestService
             if (!property_exists($this->entityClass, $property)) {
                 throw new BadRequestHttpException("Property '$property' does not exist in entity class '{$this->entityClass}'");
             }
+            $query = trim($query);
+            if ($query === '') {
+                continue;
+            }
 
-            $queryBuilder->andWhere("e.$property LIKE :{$property}")
-                ->setParameter($property, '%' . $query . '%');
+            // Lowercase the property name to match the entity field
+            $query = strtolower($query);
+
+            $queryBuilder->orWhere("LOWER(e.$property) LIKE :query")
+                ->setParameter('query', "%$query%");
         }
 
         // And has charts associated
