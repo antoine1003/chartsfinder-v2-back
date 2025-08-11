@@ -57,7 +57,7 @@ class Chart
     private Collection $runways;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
-    #[Groups(['chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?bool $needProxy = true;
 
     public function __construct()
