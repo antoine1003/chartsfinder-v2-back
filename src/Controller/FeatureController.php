@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Enum\FeatureStatusEnum;
 use App\Entity\Feature;
 use App\Entity\User;
 use App\Service\FeatureRestService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -43,6 +45,27 @@ class FeatureController extends AbstractRestController
             'id' => $feature->getId(),
             ...$result
         ]);
+    }
+
+    #[Route('/{id}/status', methods: ['PATCH'])]
+    public function updateStatus(
+        Feature $feature,
+        Request $request,
+        EntityManagerInterface $em
+    ): JsonResponse {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $data = json_decode($request->getContent(), true);
+        $status = $data['status'] ?? null;
+
+        if (!in_array($status, FeatureStatusEnum::getValues(), true)) {
+            return $this->json(['error' => 'Invalid status'], 400);
+        }
+
+        $feature->setStatus($status);
+        $em->flush();
+
+        return $this->json(['success' => true]);
     }
 
     function getGroupPrefix(): string
