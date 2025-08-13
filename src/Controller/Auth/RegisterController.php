@@ -53,6 +53,9 @@ class RegisterController extends AbstractController
             if ($e instanceof \App\Exception\EmailAlreadyExistsException) {
                 return new JsonResponse(['error' => $e->getMessage()], $e->getCode());
             }
+            if ($e instanceof \App\Exception\UsernameAlreadyExistsException) {
+                return new JsonResponse(['error' => $e->getMessage()], $e->getCode());
+            }
             throw $e;
         }
 

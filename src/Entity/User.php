@@ -48,9 +48,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, unique: true, nullable: true)]
     private ?string $googleId = null;
 
+    /**
+     * @var Collection<int, FeatureVote>
+     */
+    #[ORM\OneToMany(targetEntity: FeatureVote::class, mappedBy: 'user')]
+    private Collection $featureVotes;
+
+    /**
+     * @var Collection<int, Feature>
+     */
+    #[ORM\OneToMany(targetEntity: Feature::class, mappedBy: 'createdBy')]
+    private Collection $features;
+
+    #[ORM\Column(length: 255)]
+    private ?string $displayName = null;
+
     public function __construct()
     {
         $this->presets = new ArrayCollection();
+        $this->featureVotes = new ArrayCollection();
+        $this->features = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -196,6 +213,78 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setGoogleId(?string $googleId): static
     {
         $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FeatureVote>
+     */
+    public function getFeatureVotes(): Collection
+    {
+        return $this->featureVotes;
+    }
+
+    public function addFeatureVote(FeatureVote $featureVote): static
+    {
+        if (!$this->featureVotes->contains($featureVote)) {
+            $this->featureVotes->add($featureVote);
+            $featureVote->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFeatureVote(FeatureVote $featureVote): static
+    {
+        if ($this->featureVotes->removeElement($featureVote)) {
+            // set the owning side to null (unless already changed)
+            if ($featureVote->getUser() === $this) {
+                $featureVote->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Feature>
+     */
+    public function getFeatures(): Collection
+    {
+        return $this->features;
+    }
+
+    public function addFeature(Feature $feature): static
+    {
+        if (!$this->features->contains($feature)) {
+            $this->features->add($feature);
+            $feature->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFeature(Feature $feature): static
+    {
+        if ($this->features->removeElement($feature)) {
+            // set the owning side to null (unless already changed)
+            if ($feature->getCreatedBy() === $this) {
+                $feature->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(string $displayName): static
+    {
+        $this->displayName = $displayName;
 
         return $this;
     }

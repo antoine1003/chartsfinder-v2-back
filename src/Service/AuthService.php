@@ -10,6 +10,7 @@ use App\Entity\User;
 use App\Event\UserRegisteredEvent;
 use App\Exception\EmailAlreadyExistsException;
 use App\Exception\EmailNotValidatedException;
+use App\Exception\UsernameAlreadyExistsException;
 use App\Repository\AirportRepository;
 use App\Repository\PresetRepository;
 use App\Repository\UserRepository;
@@ -51,8 +52,14 @@ class AuthService
             throw new EmailAlreadyExistsException();
         }
 
+        $user = $this->userRepository->findOneBy(['username' => $registerDto->getUsername()]);
+        if ($user) {
+            throw new UsernameAlreadyExistsException();
+        }
+
         $user = new User();
         $user->setEmail($registerDto->getEmail());
+        $user->setDisplayName($registerDto->getUsername());
         // hash the password
         $password = $this->passwordHasher->hashPassword($user, $registerDto->getPassword());
         $user->setPassword($password);

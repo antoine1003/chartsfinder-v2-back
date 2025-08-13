@@ -71,4 +71,8 @@ abstract class AbstractRestService
 
         return $queryBuilder->getQuery()->getResult();
     }
+    public function getEntityClass(): string
+    {
+        return $this->entityClass;
+    }
 }

@@ -15,6 +15,11 @@ class RegisterDto
 
     #[Assert\NotBlank]
     #[Assert\Type("string")]
+    #[Assert\Length(min: 1, max: 255)]
+    private ?string $displayName= null;
+
+    #[Assert\NotBlank]
+    #[Assert\Type("string")]
     #[Assert\Length(max: 255)]
     private ?string $password = null;
 
@@ -50,5 +55,15 @@ class RegisterDto
     public function setCaptchaToken(?string $captchaToken): void
     {
         $this->captchaToken = $captchaToken;
+    }
+
+    public function getDisplayName(): ?string
+    {
+        return $this->displayName;
+    }
+
+    public function setDisplayName(?string $displayName): void
+    {
+        $this->displayName = $displayName;
     }
 }

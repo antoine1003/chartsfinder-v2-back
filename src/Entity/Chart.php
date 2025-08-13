@@ -60,11 +60,13 @@ class Chart
     #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?bool $needProxy = true;
 
+    #[ORM\Column(length: 255)]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    private ?string $shortName = null;
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
-        $this->presets = new ArrayCollection();
         $this->runways = new ArrayCollection();
     }
 
@@ -178,6 +180,18 @@ class Chart
     public function setNeedProxy(bool $needProxy): static
     {
         $this->needProxy = $needProxy;
+
+        return $this;
+    }
+
+    public function getShortName(): ?string
+    {
+        return $this->shortName;
+    }
+
+    public function setShortName(string $shortName): static
+    {
+        $this->shortName = $shortName;
 
         return $this;
     }
