@@ -52,14 +52,14 @@ class AuthService
             throw new EmailAlreadyExistsException();
         }
 
-        $user = $this->userRepository->findOneBy(['username' => $registerDto->getUsername()]);
+        $user = $this->userRepository->findOneBy(['displayName' => $registerDto->getDisplayName()]);
         if ($user) {
             throw new UsernameAlreadyExistsException();
         }
 
         $user = new User();
         $user->setEmail($registerDto->getEmail());
-        $user->setDisplayName($registerDto->getUsername());
+        $user->setDisplayName($registerDto->getDisplayName());
         // hash the password
         $password = $this->passwordHasher->hashPassword($user, $registerDto->getPassword());
         $user->setPassword($password);
