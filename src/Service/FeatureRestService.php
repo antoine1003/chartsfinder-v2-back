@@ -35,7 +35,15 @@ class FeatureRestService extends AbstractRestService
          * @var User $user
          */
         $user = $this->security->getUser();
-        return $this->featureRepository->getAllFeaturesWithVotes($user);
+        $data = $this->featureRepository->getAllFeaturesWithVotes($user);
+
+        // if isAnonymous is true, we should not return the createdBy field
+        foreach ($data as &$feature) {
+            if ($feature['isAnonymous']) {
+                $feature['createdBy'] = null;
+            }
+        }
+        return $data;
     }
 
     /**

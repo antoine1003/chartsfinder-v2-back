@@ -39,7 +39,7 @@ readonly class SendEmailVerificationListener
                 ->from('noreply@chartsfinder.com')
                 ->to($user->getEmail())
                 ->addBcc("antoine.dautry@gmail.com")
-                ->subject('Vérification de votre adresse e-mail')
+                ->subject('Email verification for Chartsfinder V2')
                 ->html(sprintf(
                     '<p>Hello 👋</p>
                  <p>Thanks for joining us ! Please click on the link bellow to validate your account :</p>

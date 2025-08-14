@@ -46,6 +46,14 @@ class Feature
     #[ORM\JoinColumn(nullable: false)]
     private ?User $createdBy = null;
 
+    #[ORM\Column(length: 20)]
+    #[Groups(['feature:create'])]
+    private ?string $tag = null;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    #[Groups(['feature:create'])]
+    private ?bool $isAnonymous = false;
+
     public function __construct()
     {
         $this->featureVotes = new ArrayCollection();
@@ -132,6 +140,30 @@ class Feature
     public function setCreatedBy(?User $createdBy): static
     {
         $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    public function getTag(): ?string
+    {
+        return $this->tag;
+    }
+
+    public function setTag(string $tag): static
+    {
+        $this->tag = $tag;
+
+        return $this;
+    }
+
+    public function isAnonymous(): ?bool
+    {
+        return $this->isAnonymous;
+    }
+
+    public function setIsAnonymous(bool $isAnonymous): static
+    {
+        $this->isAnonymous = $isAnonymous;
 
         return $this;
     }

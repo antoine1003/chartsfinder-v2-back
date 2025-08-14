@@ -32,6 +32,8 @@ class FeatureRepository extends ServiceEntityRepository
             f.title,
             f.description,
             f.status,
+            f.tag,
+            f.is_anonymous as isAnonymous,
             u.display_name AS createdBy,
             SUM(CASE WHEN fv.vote = :up THEN 1 ELSE 0 END) AS upVotes,
             SUM(CASE WHEN fv.vote = :down THEN 1 ELSE 0 END) AS downVotes,
