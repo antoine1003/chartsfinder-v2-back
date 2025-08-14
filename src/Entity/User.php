@@ -63,11 +63,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $displayName = null;
 
+    /**
+     * @var Collection<int, PasswordResetToken>
+     */
+    #[ORM\OneToMany(targetEntity: PasswordResetToken::class, mappedBy: 'user')]
+    private Collection $passwordResetTokens;
+
     public function __construct()
     {
         $this->presets = new ArrayCollection();
         $this->featureVotes = new ArrayCollection();
         $this->features = new ArrayCollection();
+        $this->passwordResetTokens = new ArrayCollection();
     }
 
     public function isAdmin(): bool
@@ -290,6 +297,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDisplayName(string $displayName): static
     {
         $this->displayName = $displayName;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PasswordResetToken>
+     */
+    public function getPasswordResetTokens(): Collection
+    {
+        return $this->passwordResetTokens;
+    }
+
+    public function addPasswordResetToken(PasswordResetToken $passwordResetToken): static
+    {
+        if (!$this->passwordResetTokens->contains($passwordResetToken)) {
+            $this->passwordResetTokens->add($passwordResetToken);
+            $passwordResetToken->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePasswordResetToken(PasswordResetToken $passwordResetToken): static
+    {
+        if ($this->passwordResetTokens->removeElement($passwordResetToken)) {
+            // set the owning side to null (unless already changed)
+            if ($passwordResetToken->getUser() === $this) {
+                $passwordResetToken->setUser(null);
+            }
+        }
 
         return $this;
     }
