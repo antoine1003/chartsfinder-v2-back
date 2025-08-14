@@ -20,7 +20,7 @@ class PasswordResetMailer
         $link = rtrim($frontendUrl, '/').'/reset-password/confirm?token='.urlencode($token);
 
         $email = (new Email())
-            ->from('noreply@chartfinder.com')
+            ->from('noreply@chartsfinder.com')
             ->to($toEmail)
             ->subject('Reset your password')
             ->html("
