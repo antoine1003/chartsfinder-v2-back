@@ -31,3 +31,9 @@ services:
     App\Service\Security\GoogleIdTokenVerifier:
         arguments:
             $clientId: '%google_oauth.client_id%'
+
+
+    App\Service\BrevoNewsletterClient:
+        arguments:
+            $brevoApiKey: '%env(BREVO_API_KEY)%'
+            $brevoListId: '%env(int:BREVO_LIST_ID)%'

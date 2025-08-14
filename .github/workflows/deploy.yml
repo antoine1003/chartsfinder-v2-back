@@ -60,6 +60,11 @@ jobs:
                     else
                     echo "JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}" >> .env.local
                     fi
+                    if grep -q "^BREVO_API_KEY=" .env.local; then
+                    sed -i "s|^BREVO_API_KEY=.*|BREVO_API_KEY=${{ secrets.JWT_PASSPHRASE }}|" .env.local
+                    else
+                    echo "BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}" >> .env.local
+                    fi
 
                     echo "✅ .env.local mis à jour"
 
