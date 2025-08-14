@@ -70,6 +70,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->features = new ArrayCollection();
     }
 
+    public function isAdmin(): bool
+    {
+        return in_array('ROLE_ADMIN', $this->getRoles(), true);
+    }
+
     public function getId(): ?int
     {
         return $this->id;

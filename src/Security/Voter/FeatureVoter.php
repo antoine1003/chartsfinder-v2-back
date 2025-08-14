@@ -2,8 +2,10 @@
 
 namespace App\Security\Voter;
 
+use App\Entity\Enum\FeatureStatusEnum;
 use App\Entity\Feature;
 use App\Entity\Preset;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -18,6 +20,7 @@ final class FeatureVoter extends Voter
     public const DELETE = 'feature_delete';
 
     public function __construct(
+        private Security $security
     )
     {
     }
@@ -56,10 +59,10 @@ final class FeatureVoter extends Voter
             self::VIEW,
             self::UP_VOTE,
             self::DOWN_VOTE,
-            self::REMOVE_VOTE => true, // All authenticated users can do these
+            self::REMOVE_VOTE => $subject->getStatus() !== FeatureStatusEnum::ABANDONED,
 
             self::EDIT,
-            self::DELETE => $subject->getCreatedBy()?->getId() === $user->getId(),
+            self::DELETE => $subject->getCreatedBy()?->getId() === $user->getId() || $user->isAdmin(),
             default => false,
         };
 
