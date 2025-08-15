@@ -190,4 +190,80 @@ abstract class AbstractRestController extends AbstractController
 
         return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
+
+    #[Route(path: '', name: 'update_item', requirements: ['id' => '\d+'], methods: ['PUT'])]
+    public function createUpdateItem(
+        Request $request,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        Security $security
+    ): JsonResponse
+    {
+        $data = $request->toArray();
+
+        $id = $data['id'] ?? null;
+        if (!$id) {
+            $class = $this->service->getEntityClass();
+            $item = new $class();
+        } else {
+            $item = $this->service->find($id);
+        }
+
+        if (!$item) {
+            return new JsonResponse(['error' => 'Item not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Check if the user can update this entity
+        if ($id) {
+            if (!$this->isGranted($this->UPDATE_ACTION, $item)) {
+                return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+            }
+        } else {
+            // If creating a new item, check create permission
+            if (!$this->isGranted($this->CREATE_ACTION, $item)) {
+                return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+            }
+        }
+        try {
+            // Deserialize with group
+            $item = $serializer->deserialize(
+                json_encode($data),
+                get_class($item),
+                'json',
+                [
+                    'groups' => $this->getGroupPrefix() . ':update',
+                    'object_to_populate' => $item
+                ]
+            );
+        } catch (NotEncodableValueException $e) {
+            return new JsonResponse(['error' => 'Invalid request data'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Set the authenticated user as the updater
+        $user = $security->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+        }
+
+        if (method_exists($item, 'setUpdatedBy')) {
+            $item->setUpdatedBy($user);
+        }
+
+        // Validate entity
+        $errors = $validator->validate($item);
+        if (count($errors) > 0) {
+            $errorsArray = [];
+            foreach ($errors as $error) {
+                $errorsArray[] = [
+                    'property' => $error->getPropertyPath(),
+                    'message' => $error->getMessage(),
+                ];
+            }
+            return new JsonResponse(['errors' => $errorsArray], Response::HTTP_BAD_REQUEST);
+        }
+        // Save entity
+        $this->service->save($item);
+
+        return new JsonResponse(['message' => 'Item updated'], Response::HTTP_OK);
+    }
 }

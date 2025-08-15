@@ -6,6 +6,7 @@ use App\Repository\SourceRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: SourceRepository::class)]
@@ -15,22 +16,36 @@ class Source
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['source:list', 'source:update'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['source:list', 'source:update'])]
     private ?string $countryCode = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['source:list', 'source:update'])]
     private ?string $url = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['source:list', 'source:update'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['source:list', 'source:update'])]
     private ?string $status = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['source:list', 'source:update'])]
     private ?string $urlName = null;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    #[Groups(['source:list', 'source:update'])]
+    private ?bool $ifr = false;
+
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    #[Groups(['source:list', 'source:update'])]
+    private ?bool $vfr = false;
 
     public function __construct()
     {
@@ -42,6 +57,14 @@ class Source
     {
         return $this->id;
     }
+
+
+    public function setId(?int $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
 
     public function getCountryCode(): ?string
     {
@@ -99,6 +122,30 @@ class Source
     public function setUrlName(string $urlName): static
     {
         $this->urlName = $urlName;
+
+        return $this;
+    }
+
+    public function isIfr(): ?bool
+    {
+        return $this->ifr;
+    }
+
+    public function setIfr(bool $ifr): static
+    {
+        $this->ifr = $ifr;
+
+        return $this;
+    }
+
+    public function isVfr(): ?bool
+    {
+        return $this->vfr;
+    }
+
+    public function setVfr(bool $vfr): static
+    {
+        $this->vfr = $vfr;
 
         return $this;
     }

@@ -6,6 +6,7 @@ use App\Entity\Enum\FeatureStatusEnum;
 use App\Entity\Feature;
 use App\Entity\User;
 use App\Service\FeatureRestService;
+use App\Service\SourceRestService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class SourceController extends AbstractRestController
 {
     public function __construct(
-        FeatureRestService $service
+        SourceRestService $service
     )
     {
         parent::__construct($service);
