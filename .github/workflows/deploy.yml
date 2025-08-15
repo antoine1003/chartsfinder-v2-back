@@ -71,6 +71,10 @@ jobs:
                     # 3) Installer les dépendances
                     composer install --prefer-dist --no-dev --optimize-autoloader
 
+                    # ❗ CLEAN the autoloader cache before rebuilding it for prod
+                    rm -rf vendor/composer/autoload_*
+                    composer dump-autoload --optimize
+
                     # 4) Compiler l'environnement
                     composer dump-env prod
 
