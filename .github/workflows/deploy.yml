@@ -36,10 +36,10 @@ jobs:
 
             - name: Run remote deployment commands
               run: |
-                  ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                  ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
                   set -euo pipefail
 
-                  TAG_NAME="${GITHUB_REF_NAME}"
+                  TAG_NAME="${GITHUB_REF##refs/tags/}"
                   RELEASE_DIR="/var/www/cf-v2/back/releases/$TAG_NAME"
                   CURRENT_LINK="/var/www/cf-v2/back/current"
 
