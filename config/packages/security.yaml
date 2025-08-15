@@ -28,9 +28,6 @@ security:
             stateless: true
             entry_point: jwt
             jwt: ~
-            refresh_jwt:
-                check_path: /api/refresh-token
-                provider: app_user_provider
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
