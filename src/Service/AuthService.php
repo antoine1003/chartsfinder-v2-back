@@ -6,6 +6,7 @@ use App\Dto\PresetDto;
 use App\Dto\RegisterDto;
 use App\Entity\Airport;
 use App\Entity\Preset;
+use App\Entity\RefreshToken;
 use App\Entity\User;
 use App\Event\UserRegisteredEvent;
 use App\Exception\EmailAlreadyExistsException;
@@ -17,10 +18,12 @@ use App\Repository\UserRepository;
 use App\Service\Security\GoogleIdTokenVerifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Random\RandomException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -35,7 +38,8 @@ class AuthService
         private readonly UserRepository    $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly GoogleIdTokenVerifier $verifier,
-        private readonly JWTTokenManagerInterface $jwtManager
+        private readonly JWTTokenManagerInterface $jwtManager,
+        private readonly RefreshTokenManagerInterface $refreshTokenManager
     )
     {
     }
@@ -78,7 +82,7 @@ class AuthService
     }
 
 
-    function registerGoogle(string $token): string
+    function registerGoogle(string $token): array
     {
         if (!$token) {
             throw new \InvalidArgumentException('Missing idToken');
@@ -122,6 +126,20 @@ class AuthService
         $this->entityManager->flush();
 
         // Issue YOUR app JWT
-        return $this->jwtManager->create($user);
+        $jwt = $this->jwtManager->create($user);
+        $refreshTokenString = bin2hex(random_bytes(64));
+
+        // Create and save RefreshToken entity
+        $refreshToken = new RefreshToken();
+        $refreshToken->setRefreshToken($refreshTokenString);
+        $refreshToken->setUsername($user->getUserIdentifier());
+        $refreshToken->setValid((new \DateTime())->modify('+1 month')); // Match your TTL config
+
+        $this->refreshTokenManager->save($refreshToken);
+
+        return [
+            'token' => $jwt,
+            'refresh_token' => $refreshTokenString,
+        ];
     }
 }

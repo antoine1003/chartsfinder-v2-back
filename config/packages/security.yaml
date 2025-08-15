@@ -26,7 +26,11 @@ security:
         api:
             pattern: ^/api
             stateless: true
+            entry_point: jwt
             jwt: ~
+            refresh_jwt:
+                check_path: /api/refresh-token
+                provider: app_user_provider
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -39,6 +43,7 @@ security:
     access_control:
         - { path: ^/api/auth/google$, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/refresh-token, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/forgot-password, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }

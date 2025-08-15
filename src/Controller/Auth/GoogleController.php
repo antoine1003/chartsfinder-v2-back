@@ -39,7 +39,7 @@ class GoogleController extends AbstractController
         $idToken = $data['token'] ?? null;
 
         try {
-            $token =  $this->authService->registerGoogle($idToken);
+            $data =  $this->authService->registerGoogle($idToken);
         } catch (\Exception $e) {
             $this->logger->error('Registration error: ' . $e->getMessage(), ['exception' => $e]);
             // Handle exceptions, such as email already exists
@@ -48,8 +48,6 @@ class GoogleController extends AbstractController
             }
             throw $e;
         }
-        return $this->json([
-            'token' => $token
-        ]);
+        return $this->json($data);
     }
 }
