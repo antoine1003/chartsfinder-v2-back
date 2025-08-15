@@ -3,21 +3,16 @@
 namespace App\EventListener;
 
 use App\Event\NewFeatureEvent;
-use App\Event\UserRegisteredEvent;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[AsEventListener(event: NewFeatureEvent::NAME, method: 'onNewFeature')]
 readonly class NewFeatureListener
 {
     public function __construct(
-        private MailerInterface       $mailer,
-        private UrlGeneratorInterface $urlGenerator,
-        private LoggerInterface       $logger
+        private MailerInterface       $mailer
     ) {}
 
     /**
