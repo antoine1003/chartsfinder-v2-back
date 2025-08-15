@@ -4,17 +4,17 @@ namespace App\Security\Voter;
 
 use App\Entity\Enum\FeatureStatusEnum;
 use App\Entity\Feature;
+use App\Entity\Preset;
+use App\Entity\Source;
 use App\Entity\User;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-final class FeatureVoter extends Voter
+final class SourceVoter extends Voter
 {
     public const CREATE = 'create';
-    public const UP_VOTE = 'feature_upvote';
-    public const DOWN_VOTE = 'feature_downvote';
-    public const REMOVE_VOTE = 'feature_remove_vote';
     public const READ = 'read';
     public const READ_ALL = 'read_all';
     public const DELETE = 'delete';
@@ -27,17 +27,17 @@ final class FeatureVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        if ($subject === Feature::class && in_array($attribute,[self::READ_ALL, self::SEARCH] )) {
+        if ($subject === Source::class && in_array($attribute,[self::READ_ALL, self::SEARCH] )) {
             // Special case for viewing the Feature class
             return true;
         }
         // Check if the attribute is one of the defined constants
-        if (!in_array($attribute, [self::UP_VOTE, self::DOWN_VOTE, self::REMOVE_VOTE, self::UPDATE, self::READ, self::DELETE, self::CREATE], true)) {
+        if (!in_array($attribute, [self::UPDATE, self::READ, self::DELETE, self::CREATE], true)) {
             return false;
         }
 
         // Check if the subject is an instance of Preset
-        if (!$subject instanceof Feature) {
+        if (!$subject instanceof Source) {
             return false;
         }
 
@@ -46,7 +46,7 @@ final class FeatureVoter extends Voter
 
     /**
      * @param string $attribute
-     * @param Feature $subject
+     * @param Source $subject
      * @param TokenInterface $token
      * @return bool
      */
@@ -67,11 +67,6 @@ final class FeatureVoter extends Voter
             case self::SEARCH:
             case self::READ:
                 return true;
-
-            case self::UP_VOTE:
-            case self::DOWN_VOTE:
-            case self::REMOVE_VOTE:
-                return $subject->getStatus() !== FeatureStatusEnum::ABANDONED;
 
             case self::DELETE:
             case self::UPDATE:

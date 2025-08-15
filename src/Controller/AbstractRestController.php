@@ -18,6 +18,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 abstract class AbstractRestController extends AbstractController
 {
+    private string $CREATE_ACTION = 'create';
+    private string $READ_ACTION = 'read';
+    private string $READ_ALL_ACTION = 'read_all';
+    private string $SEARCH_ACTION = 'search';
+    private string $UPDATE_ACTION = 'update';
+    private string $DELETE_ACTION = 'delete';
+
+
     public function __construct(
         protected AbstractRestService $service
     )
@@ -35,6 +43,10 @@ abstract class AbstractRestController extends AbstractController
             return new JsonResponse(['error' => 'Item not found'], Response::HTTP_NOT_FOUND);
         }
 
+        // Check if the user can read this entity
+        if (!$this->isGranted($this->READ_ACTION, $this->service->getEntityClass())) {
+            return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
         $json = $serializer->serialize($item, 'json', ['groups' => $this->getGroupPrefix() . ':detail']);
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
@@ -44,7 +56,9 @@ abstract class AbstractRestController extends AbstractController
     public function getAllItems(SerializerInterface $serializer): JsonResponse
     {
         $items = $this->service->findAll();
-
+        if (!$this->isGranted($this->READ_ALL_ACTION, $this->service->getEntityClass())) {
+            return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
         $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
@@ -60,6 +74,11 @@ abstract class AbstractRestController extends AbstractController
         if (empty($criteria)) {
             return $this->json(['error' => 'No criteria provided'], Response::HTTP_BAD_REQUEST);
         }
+
+        if (!$this->isGranted($this->READ_ALL_ACTION, $this->service->getEntityClass())) {
+            return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
+
         $items = $this->service->findBy($criteria);
 
         $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
@@ -73,6 +92,11 @@ abstract class AbstractRestController extends AbstractController
         SerializerInterface $serializer
     ): JsonResponse
     {
+
+        if (!$this->isGranted($this->SEARCH_ACTION, $this->service->getEntityClass())) {
+            return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
+
         $items = $this->service->search($searchCriteriaDto);
 
         $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
@@ -122,6 +146,12 @@ abstract class AbstractRestController extends AbstractController
             $item->setCreatedBy($user);
         }
 
+        // Check if the user can create this entity
+        if (!$this->isGranted($this->CREATE_ACTION, $item)) {
+            return $this->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
+
+
         // Validate entity
         $errors = $validator->validate($item);
         if (count($errors) > 0) {
@@ -141,5 +171,23 @@ abstract class AbstractRestController extends AbstractController
         $this->service->save($item);
 
         return $this->json(['message' => 'Item created'], Response::HTTP_CREATED);
+    }
+
+    #[Route(path: '/{id}', name: 'delete_item', requirements: ['id' => '\d+'], methods: ['DELETE'])]
+    public function deleteItem(int $id ): JsonResponse
+    {
+        $item = $this->service->find($id);
+        if (!$item) {
+            return new JsonResponse(['error' => 'Item not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Check if the user can delete this entity
+        if (!$this->isGranted($this->DELETE_ACTION, $item)) {
+            return new JsonResponse(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
+
+        $this->service->delete($item);
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

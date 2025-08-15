@@ -41,7 +41,7 @@ class PresetController extends AbstractController
     }
 
     #[Route(path: '/{id}', name: '_one', requirements: ['id' => '\d+'], methods: ['GET'])]
-    #[ISGranted(PresetVoter::VIEW, subject: 'preset')]
+    #[ISGranted(PresetVoter::READ, subject: 'preset')]
     public function getOne(Preset $preset, SerializerInterface $serializer): JsonResponse
     {
         $json = $serializer->serialize($preset, 'json', ['groups' => ['preset:detail']]);

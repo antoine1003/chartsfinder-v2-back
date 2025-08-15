@@ -14,9 +14,6 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
-/**
- * @extends AbstractRestService<AirportRepository>
- */
 class ContactService
 {
     public function __construct(

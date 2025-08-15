@@ -5,11 +5,12 @@ namespace App\Service;
 use App\Entity\Airport;
 use App\Entity\Chart;
 use App\Repository\AirportRepository;
+use App\Repository\ChartRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 /**
- * @extends AbstractRestService<AirportRepository>
+ * @extends AbstractRestService<ChartRepository>
  */
 class ChartRestService extends AbstractRestService
 {

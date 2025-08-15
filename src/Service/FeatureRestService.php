@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * @extends AbstractRestService<AirportRepository>
+ * @extends AbstractRestService<FeatureRepository>
  */
 class FeatureRestService extends AbstractRestService
 {
