@@ -1,87 +1,77 @@
-name: Deploy to VPS
+name: Deploy Tagged Release to VPS
 
 on:
     push:
-        branches:
-            - main
+        tags:
+            - 'v*'  # Match version tags like v1.2.0
 
 jobs:
     deploy:
         runs-on: ubuntu-latest
 
         steps:
-            -   name: Checkout code
-                uses: actions/checkout@v4
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-            -   name: Set up SSH
-                run: |
-                    mkdir -p ~/.ssh
-                    echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-                    chmod 600 ~/.ssh/id_rsa
-                    ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+            - name: Set up SSH
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+                  chmod 600 ~/.ssh/id_rsa
+                  ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-            -   name: Rsync files to VPS with correct user
-                run: |
-                    rsync -avz --delete \
-                      --exclude=".git*" \
-                      --exclude="node_modules" \
-                      --exclude="vendor" \
-                      --exclude="var/cache" \
-                      --exclude="var/log" \
-                      --exclude="config/jwt" \
-                      --chown=adautry:www-data \
-                      ./ \
-                      ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/cf-v2/back
+            - name: Rsync files to release directory
+              run: |
+                  RELEASE_DIR="/var/www/cf-v2/back/releases/${GITHUB_REF_NAME}"
+                  rsync -avz --delete \
+                    --exclude=".git*" \
+                    --exclude="node_modules" \
+                    --exclude="vendor" \
+                    --exclude="var/cache" \
+                    --exclude="var/log" \
+                    --exclude="config/jwt" \
+                    --chown=adautry:www-data \
+                    ./ \
+                    ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:$RELEASE_DIR
 
-            -   name: Run remote deployment commands
-                run: |
-                    ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-                    set -euo pipefail
-                    cd /var/www/cf-v2/back
+            - name: Run remote deployment commands
+              run: |
+                  ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+                  set -euo pipefail
 
-                    # 1) Nettoyer le cache avant de modifier quoi que ce soit
-                    rm -rf var/cache/*
+                  TAG_NAME="${GITHUB_REF_NAME}"
+                  RELEASE_DIR="/var/www/cf-v2/back/releases/$TAG_NAME"
+                  CURRENT_LINK="/var/www/cf-v2/back/current"
 
-                    export APP_ENV=prod APP_DEBUG=0
-                    export COMPOSER_NO_INTERACTION=1
-                    umask 002
+                  echo "🔗 Updating current symlink"
+                  ln -sfn "$RELEASE_DIR" "$CURRENT_LINK"
 
+                  cd "$CURRENT_LINK"
+                  export APP_ENV=prod APP_DEBUG=0
+                  export COMPOSER_NO_INTERACTION=1
+                  umask 002
 
-                    touch .env.local
-                    # MAILER_DSN
-                    if grep -q "^MAILER_DSN=" .env.local; then
-                    sed -i "s|^MAILER_DSN=.*|MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default|" .env.local
-                    else
-                    echo "MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default" >> .env.local
-                    fi
-                    # JWT_PASSPHRASE
-                    if grep -q "^JWT_PASSPHRASE=" .env.local; then
-                    sed -i "s|^JWT_PASSPHRASE=.*|JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}|" .env.local
-                    else
-                    echo "JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}" >> .env.local
-                    fi
-                    if grep -q "^BREVO_API_KEY=" .env.local; then
-                    sed -i "s|^BREVO_API_KEY=.*|BREVO_API_KEY=${{ secrets.JWT_PASSPHRASE }}|" .env.local
-                    else
-                    echo "BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}" >> .env.local
-                    fi
+                  echo "📦 Updating .env.local"
+                  touch .env.local
+                  grep -q "^MAILER_DSN=" .env.local && sed -i "s|^MAILER_DSN=.*|MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default|" .env.local || echo "MAILER_DSN=brevo+api://${{ secrets.BREVO_API_KEY }}@default" >> .env.local
+                  grep -q "^JWT_PASSPHRASE=" .env.local && sed -i "s|^JWT_PASSPHRASE=.*|JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}|" .env.local || echo "JWT_PASSPHRASE=${{ secrets.JWT_PASSPHRASE }}" >> .env.local
+                  grep -q "^BREVO_API_KEY=" .env.local && sed -i "s|^BREVO_API_KEY=.*|BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}|" .env.local || echo "BREVO_API_KEY=${{ secrets.BREVO_API_KEY }}" >> .env.local
 
-                    echo "✅ .env.local mis à jour"
+                  echo "✅ .env.local mis à jour"
 
-                    # 3) Installer les dépendances
-                    composer install --prefer-dist --no-dev --optimize-autoloader
+                  echo "🛠 Installing dependencies"
+                  composer install --prefer-dist --no-dev --optimize-autoloader
 
-                    # 4) Compiler l'environnement
-                    composer dump-env prod
+                  echo "🔧 Compiling prod environment"
+                  composer dump-env prod
 
-                    # --- Générer les clés JWT si elles n'existent pas ---
-                    php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction
-                    echo "✅ Clés JWT vérifiées / générées"
+                  echo "🔐 Checking JWT keys"
+                  php bin/console lexik:jwt:generate-keypair --skip-if-exists --no-interaction
 
-                    # 5) Recréer le cache proprement
-                    php bin/console cache:clear --env=prod --no-warmup
-                    php bin/console d:s:u -f
-                    php bin/console cache:warmup --env=prod
+                  echo "♻️ Clearing and warming up cache"
+                  php bin/console cache:clear --env=prod --no-warmup
+                  php bin/console d:s:u -f
+                  php bin/console cache:warmup --env=prod
 
-                    echo "✅ Déploiement terminé sur le serveur"
-                    EOF
+                  echo "🚀 Deployment of $TAG_NAME complete"
+                  EOF
