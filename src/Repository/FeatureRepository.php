@@ -53,7 +53,7 @@ class FeatureRepository extends ServiceEntityRepository
         ];
         if (!$currentUser->isAdmin()) {
             $sql .= ' WHERE f.status != :archived';
-            $params['status'] = FeatureStatusEnum::ABANDONED;
+            $params['archived'] = FeatureStatusEnum::ABANDONED;
         } else {
             $sql .= ' WHERE 1=1';
         }
