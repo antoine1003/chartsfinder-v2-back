@@ -5,10 +5,10 @@ namespace App\Service;
 use App\Entity\Feature;
 use App\Entity\FeatureVote;
 use App\Entity\User;
-use App\Repository\AirportRepository;
 use App\Repository\FeatureRepository;
 use App\Repository\FeatureVoteRepository;
 use App\Security\Voter\FeatureVoter;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -29,6 +29,10 @@ class FeatureRestService extends AbstractRestService
 
 
     // Block finAll to avoid returning all airports
+
+    /**
+     * @throws Exception
+     */
     public function findAll(): array
     {
         /**
