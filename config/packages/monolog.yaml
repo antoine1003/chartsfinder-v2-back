@@ -43,7 +43,7 @@ when@prod:
             main:
                 type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
-                level: debug
+                level: info
                 max_files: 7           # Keep the last 7 days of logs
             console:
                 type: console
