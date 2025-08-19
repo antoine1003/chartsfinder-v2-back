@@ -66,6 +66,7 @@ final class FeatureVoter extends Voter
             case self::READ_ALL:
             case self::SEARCH:
             case self::READ:
+            case self::CREATE:
                 return true;
 
             case self::UP_VOTE:
@@ -75,7 +76,6 @@ final class FeatureVoter extends Voter
 
             case self::DELETE:
             case self::UPDATE:
-            case self::CREATE:
                 // Only allow deletion if the user is the owner of the feature
                 return $user->isAdmin();
             default:
