@@ -60,8 +60,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Feature::class, mappedBy: 'createdBy')]
     private Collection $features;
 
-    #[ORM\Column(length: 255)]
-    private ?string $displayName = null;
 
     /**
      * @var Collection<int, PasswordResetToken>
@@ -285,18 +283,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $feature->setCreatedBy(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getDisplayName(): ?string
-    {
-        return $this->displayName;
-    }
-
-    public function setDisplayName(string $displayName): static
-    {
-        $this->displayName = $displayName;
 
         return $this;
     }

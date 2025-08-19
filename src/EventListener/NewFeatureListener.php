@@ -32,12 +32,10 @@ readonly class NewFeatureListener
             <p><strong>Feature Title:</strong> %s</p>
             <p><strong>Description:</strong> %s</p>
             <p><strong>Feature tag:</strong> %s</p>
-            <p><strong>Created By:</strong> %s</p>
             <p><strong>Email:</strong> %s</p>',
             $feature->getTitle(),
             $feature->getDescription(),
             $feature->getTag(),
-            $feature->getCreatedBy()->getDisplayName(),
             $feature->getCreatedBy()->getEmail()
         ));
 
