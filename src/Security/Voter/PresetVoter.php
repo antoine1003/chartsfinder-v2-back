@@ -61,12 +61,12 @@ final class PresetVoter extends Voter
         switch ($attribute) {
             case self::READ_ALL:
             case self::SEARCH:
-            case self::READ:
                 return true;
 
             case self::CREATE:
             case self::DELETE:
             case self::UPDATE:
+            case self::READ:
                 // Only allow deletion if the user is the owner of the feature
                 return $subject->getUser() === $user || $user->isAdmin();
             default:
