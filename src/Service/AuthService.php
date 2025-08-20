@@ -115,6 +115,7 @@ class AuthService
             if (method_exists($user, 'setGoogleId') && !$user->getGoogleId()) {
                 $user->setGoogleId($googleId);
                 $user->setIsEmailValidated(true);
+                $user->setEmailValidationToken(null);
             }
         }
         $this->entityManager->flush();

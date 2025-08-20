@@ -33,6 +33,7 @@ class VerifyEmailController extends AbstractController
         UserRepository $userRepo,
         EntityManagerInterface $em,
         ParameterBagInterface $params,
+        LoggerInterface $logger
     ): RedirectResponse
     {
         $user = $userRepo->findOneBy(['emailValidationToken' => $token]);
@@ -40,9 +41,9 @@ class VerifyEmailController extends AbstractController
         $frontendUrl = $params->get('frontendUrl');
 
         if (!$user) {
+            $logger->warning('Email validation failed: User not found for token', ['token' => $token]);
             // redirect to the frontend with an error message
             return new RedirectResponse($frontendUrl . '/login?emailValidation=error');
-
         }
 
         $user->setEmailValidationToken(null);
@@ -50,6 +51,7 @@ class VerifyEmailController extends AbstractController
 
         $em->flush();
 
+        $logger->info('Email validation successful', ['userId' => $user->getId(), 'email' => $user->getEmail()]);
         return new RedirectResponse($frontendUrl . '/login?emailValidation=success');
     }
 }
