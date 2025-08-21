@@ -170,7 +170,7 @@ abstract class AbstractRestController extends AbstractController
         // Save entity
         $this->service->save($item);
 
-        return $this->json(['message' => 'Item created'], Response::HTTP_CREATED);
+        return $this->json($item, Response::HTTP_CREATED);
     }
 
     #[Route(path: '/{id}', name: 'delete_item', requirements: ['id' => '\d+'], methods: ['DELETE'])]
