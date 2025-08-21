@@ -27,9 +27,6 @@ class FeatureRestService extends AbstractRestService
         parent::__construct(Feature::class, $entityManager);
     }
 
-
-    // Block finAll to avoid returning all airports
-
     /**
      * @throws Exception
      */

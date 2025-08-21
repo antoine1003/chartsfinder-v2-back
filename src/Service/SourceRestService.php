@@ -22,5 +22,4 @@ class SourceRestService extends AbstractRestService
         parent::__construct(Source::class, $entityManager);
     }
 
-
 }

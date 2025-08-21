@@ -16,35 +16,35 @@ class Source
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?string $countryCode = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?string $url = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?string $status = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?string $urlName = null;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?bool $ifr = false;
 
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
-    #[Groups(['source:list', 'source:update'])]
+    #[Groups(['source:list', 'source:update', 'source:create', 'source:detail'])]
     private ?bool $vfr = false;
 
     public function __construct()

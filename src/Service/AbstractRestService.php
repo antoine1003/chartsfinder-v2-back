@@ -5,7 +5,9 @@ namespace App\Service;
 use App\Dto\SearchCriteriaDto;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 
 abstract class AbstractRestService
 {
@@ -71,6 +73,8 @@ abstract class AbstractRestService
 
         return $queryBuilder->getQuery()->getResult();
     }
+
+
     public function getEntityClass(): string
     {
         return $this->entityClass;

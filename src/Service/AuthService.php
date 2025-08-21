@@ -2,29 +2,20 @@
 
 namespace App\Service;
 
-use App\Dto\PresetDto;
 use App\Dto\RegisterDto;
-use App\Entity\Airport;
-use App\Entity\Preset;
 use App\Entity\RefreshToken;
 use App\Entity\User;
 use App\Event\UserRegisteredEvent;
 use App\Exception\EmailAlreadyExistsException;
 use App\Exception\EmailNotValidatedException;
-use App\Exception\UsernameAlreadyExistsException;
 use App\Repository\AirportRepository;
-use App\Repository\PresetRepository;
 use App\Repository\UserRepository;
 use App\Service\Security\GoogleIdTokenVerifier;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Random\RandomException;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**

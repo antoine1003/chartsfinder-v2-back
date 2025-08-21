@@ -167,10 +167,17 @@ abstract class AbstractRestController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+
         // Save entity
         $this->service->save($item);
 
-        return $this->json(['message' => 'Item created'], Response::HTTP_CREATED);
+        $serialized = $serializer->serialize(
+            $item,
+            'json',
+            ['groups' => $this->getGroupPrefix() . ':detail']
+        );
+
+        return $this->json($serialized, Response::HTTP_CREATED);
     }
 
     #[Route(path: '/{id}', name: 'delete_item', requirements: ['id' => '\d+'], methods: ['DELETE'])]
