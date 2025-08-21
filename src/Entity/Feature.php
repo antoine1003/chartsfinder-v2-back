@@ -20,16 +20,16 @@ class Feature
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['feature:create'])]
+    #[Groups(['feature:create', 'feature:update'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['feature:create'])]
+    #[Groups(['feature:create', 'feature:update'])]
     #[Assert\NotBlank(message: "titleRequired")]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['feature:create'])]
+    #[Groups(['feature:create', 'feature:update'])]
     #[Assert\NotBlank(message: "descriptionRequired")]
     private ?string $description = null;
 
@@ -47,7 +47,7 @@ class Feature
     private ?User $createdBy = null;
 
     #[ORM\Column(length: 20)]
-    #[Groups(['feature:create'])]
+    #[Groups(['feature:create', 'feature:update'])]
     private ?string $tag = null;
 
     public function __construct()
