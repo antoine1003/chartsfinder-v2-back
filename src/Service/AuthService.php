@@ -128,4 +128,19 @@ class AuthService
             'refresh_token' => $refreshTokenString,
         ];
     }
+
+    public function deleteAccount(User $user): void
+    {
+        // Remove associated refresh tokens
+        $refreshTokens = $this->entityManager->getRepository(RefreshToken::class)
+            ->findBy(['username' => $user->getUserIdentifier()]);
+
+        foreach ($refreshTokens as $token) {
+            $this->refreshTokenManager->delete($token);
+        }
+
+        // Remove the user
+        $this->entityManager->remove($user);
+        $this->entityManager->flush();
+    }
 }

@@ -14,11 +14,11 @@ class FeatureVote
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'featureVotes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Feature $feature = null;
 
     #[ORM\ManyToOne(inversedBy: 'featureVotes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\Column(length: 5)]

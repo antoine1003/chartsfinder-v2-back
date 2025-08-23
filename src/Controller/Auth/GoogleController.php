@@ -2,23 +2,12 @@
 
 namespace App\Controller\Auth;
 
-use App\Dto\RegisterDto;
-use App\Entity\User;
 use App\Exception\EmailAlreadyExistsException;
-use App\Repository\UserRepository;
-use App\Service\AirportRestService;
 use App\Service\AuthService;
-use App\Service\Security\CaptchaVerifier;
-use App\Service\Security\GoogleIdTokenVerifier;
-use Doctrine\ORM\EntityManagerInterface;
-use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Psr\Log\LoggerInterface;
-use Random\RandomException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route(path: '/api/auth/google')]

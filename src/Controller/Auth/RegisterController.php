@@ -3,8 +3,6 @@
 namespace App\Controller\Auth;
 
 use App\Dto\RegisterDto;
-use App\Repository\UserRepository;
-use App\Service\AirportRestService;
 use App\Service\AuthService;
 use App\Service\Security\CaptchaVerifier;
 use Psr\Log\LoggerInterface;

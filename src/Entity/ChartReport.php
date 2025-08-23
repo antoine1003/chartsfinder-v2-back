@@ -27,6 +27,7 @@ class ChartReport
 
     #[ORM\ManyToOne(inversedBy: 'chartReports')]
     #[Groups(['report:detail'])]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\Column(options: ['default' => false])]
