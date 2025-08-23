@@ -3,6 +3,10 @@
 namespace App\Service;
 
 use App\Dto\SearchCriteriaDto;
+use App\Entity\Chart;
+use App\Entity\ChartReport;
+use App\Entity\User;
+use App\Exception\ChartAlreadyReportedException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\HttpFoundation\Response;

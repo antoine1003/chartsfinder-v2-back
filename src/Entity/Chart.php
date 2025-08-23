@@ -63,11 +63,18 @@ class Chart
     #[ORM\Column(length: 255)]
     #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
     private ?string $shortName = null;
+
+    /**
+     * @var Collection<int, ChartReport>
+     */
+    #[ORM\OneToMany(targetEntity: ChartReport::class, mappedBy: 'chart')]
+    private Collection $chartReports;
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->runways = new ArrayCollection();
+        $this->chartReports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -192,6 +199,36 @@ class Chart
     public function setShortName(string $shortName): static
     {
         $this->shortName = $shortName;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChartReport>
+     */
+    public function getChartReports(): Collection
+    {
+        return $this->chartReports;
+    }
+
+    public function addChartReport(ChartReport $chartReport): static
+    {
+        if (!$this->chartReports->contains($chartReport)) {
+            $this->chartReports->add($chartReport);
+            $chartReport->setChart($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChartReport(ChartReport $chartReport): static
+    {
+        if ($this->chartReports->removeElement($chartReport)) {
+            // set the owning side to null (unless already changed)
+            if ($chartReport->getChart() === $this) {
+                $chartReport->setChart(null);
+            }
+        }
 
         return $this;
     }
