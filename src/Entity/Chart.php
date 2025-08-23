@@ -21,32 +21,33 @@ class Chart
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $url = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $airac = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $type = null;
 
     #[ORM\ManyToOne(inversedBy: 'charts')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['report:detail'])]
     private ?Airport $airport = null;
 
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $subType = null;
 
     /**
@@ -57,17 +58,25 @@ class Chart
     private Collection $runways;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?bool $needProxy = true;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['chart:list', 'chart:detail', 'preset:detail'])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $shortName = null;
+
+    /**
+     * @var Collection<int, ChartReport>
+     */
+    #[ORM\OneToMany(targetEntity: ChartReport::class, mappedBy: 'chart')]
+    private Collection $chartReports;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
         $this->runways = new ArrayCollection();
+        $this->chartReports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -192,6 +201,36 @@ class Chart
     public function setShortName(string $shortName): static
     {
         $this->shortName = $shortName;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChartReport>
+     */
+    public function getChartReports(): Collection
+    {
+        return $this->chartReports;
+    }
+
+    public function addChartReport(ChartReport $chartReport): static
+    {
+        if (!$this->chartReports->contains($chartReport)) {
+            $this->chartReports->add($chartReport);
+            $chartReport->setChart($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChartReport(ChartReport $chartReport): static
+    {
+        if ($this->chartReports->removeElement($chartReport)) {
+            // set the owning side to null (unless already changed)
+            if ($chartReport->getChart() === $this) {
+                $chartReport->setChart(null);
+            }
+        }
 
         return $this;
     }

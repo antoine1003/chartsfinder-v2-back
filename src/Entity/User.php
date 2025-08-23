@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -16,9 +17,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['report:detail'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Groups(['report:detail'])]
     private ?string $email = null;
 
     /**
@@ -67,12 +70,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: PasswordResetToken::class, mappedBy: 'user')]
     private Collection $passwordResetTokens;
 
+    /**
+     * @var Collection<int, ChartReport>
+     */
+    #[ORM\OneToMany(targetEntity: ChartReport::class, mappedBy: 'user')]
+    private Collection $chartReports;
+
     public function __construct()
     {
         $this->presets = new ArrayCollection();
         $this->featureVotes = new ArrayCollection();
         $this->features = new ArrayCollection();
         $this->passwordResetTokens = new ArrayCollection();
+        $this->chartReports = new ArrayCollection();
     }
 
     public function isAdmin(): bool
@@ -311,6 +321,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($passwordResetToken->getUser() === $this) {
                 $passwordResetToken->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChartReport>
+     */
+    public function getChartReports(): Collection
+    {
+        return $this->chartReports;
+    }
+
+    public function addChartReport(ChartReport $chartReport): static
+    {
+        if (!$this->chartReports->contains($chartReport)) {
+            $this->chartReports->add($chartReport);
+            $chartReport->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChartReport(ChartReport $chartReport): static
+    {
+        if ($this->chartReports->removeElement($chartReport)) {
+            // set the owning side to null (unless already changed)
+            if ($chartReport->getUser() === $this) {
+                $chartReport->setUser(null);
             }
         }
 

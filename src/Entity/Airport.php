@@ -17,11 +17,11 @@ class Airport
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     #[ORM\Column(type: 'integer')]
-    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'report:detail'])]
     private int $id;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'report:detail'])]
     private string $name;
 
     #[ORM\Column(type: 'float')]
@@ -34,7 +34,7 @@ class Airport
     private ?float $elevationFt = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'report:detail'])]
     private ?string $icaoCode = null;
 
     /**
