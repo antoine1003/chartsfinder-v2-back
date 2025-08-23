@@ -32,19 +32,28 @@ class FeatureRepository extends ServiceEntityRepository
 
         $sql = '
         SELECT
-            f.id,
-            f.title,
-            f.description,
-            f.status,
-            f.tag,
-            u.id AS createdBy,
-            f.created_at as createdAt,
-            SUM(CASE WHEN fv.vote = :up THEN 1 ELSE 0 END) AS upVotes,
-            SUM(CASE WHEN fv.vote = :down THEN 1 ELSE 0 END) AS downVotes,
-            MAX(CASE WHEN fv.user_id = :userId THEN fv.vote ELSE \'none\' END) AS userVote
+          f.id,
+          f.title,
+          f.description,
+          f.status,
+          f.tag,
+          u.id AS createdBy,
+          f.created_at AS createdAt,
+
+          -- Compteurs globaux
+          SUM(CASE WHEN fv.vote = :up   THEN 1 ELSE 0 END) AS upVotes,
+          SUM(CASE WHEN fv.vote = :down THEN 1 ELSE 0 END) AS downVotes,
+
+          fvu.vote AS userVote
         FROM feature f
-        LEFT JOIN feature_vote fv ON f.id = fv.feature_id
         JOIN user u ON f.created_by_id = u.id
+        LEFT JOIN feature_vote fv
+          ON fv.feature_id = f.id
+        LEFT JOIN feature_vote fvu
+          ON fvu.feature_id = f.id
+            AND fvu.user_id   = :userId
+        GROUP BY
+          f.id, f.title, f.description, f.status, f.tag, u.id, f.created_at, fvu.vote;
     ';
         $params = [
             'up' => 'up',
