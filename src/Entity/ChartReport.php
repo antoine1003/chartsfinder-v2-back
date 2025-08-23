@@ -31,7 +31,7 @@ class ChartReport
 
     #[ORM\Column(options: ['default' => false])]
     #[Groups(['report:detail'])]
-    private ?bool $resolved = null;
+    private ?bool $resolved = false;
 
     #[Groups(['report:detail'])]
     #[Context([DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s'])]
