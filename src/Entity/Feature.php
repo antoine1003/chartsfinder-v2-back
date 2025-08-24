@@ -43,7 +43,7 @@ class Feature
     private ?string $status = FeatureStatusEnum::PENDING;
 
     #[ORM\ManyToOne(inversedBy: 'features')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $createdBy = null;
 
     #[ORM\Column(length: 20)]
