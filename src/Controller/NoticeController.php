@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\UserNotice;
+use App\Repository\UserNoticeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,7 @@ class NoticeController extends AbstractController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SerializerInterface $serializer,
+        private readonly UserNoticeRepository $userNoticeRepository,
     )
     {
     }
@@ -32,19 +34,10 @@ class NoticeController extends AbstractController
             return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $notices = $this->entityManager->getRepository(UserNotice::class)->findBy(['isActive' => true]);
 
-        $dismissedNotices = $user->getUserNoticeDismissals()->map(fn ($dismissal) => $dismissal->getNotice());
+        $dismissedNotices = $this->userNoticeRepository->getUnreadNoticesForUser($user);
 
-        $noticesToDisplay = [];
-        foreach ($notices as $notice) {
-            if ($dismissedNotices->contains($notice)) {
-                continue;
-            }
-            $noticesToDisplay[] = $notice;
-        }
-
-        $json = $this->serializer->serialize($noticesToDisplay, 'json', ['groups' => ['notice:list']]);
+        $json = $this->serializer->serialize($dismissedNotices, 'json', ['groups' => ['notice:list']]);
 
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
