@@ -76,6 +76,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: ChartReport::class, mappedBy: 'user')]
     private Collection $chartReports;
 
+    /**
+     * @var Collection<int, UserNoticeDismissal>
+     */
+    #[ORM\OneToMany(targetEntity: UserNoticeDismissal::class, mappedBy: 'user', cascade: ['persist'],)]
+    private Collection $userNoticeDismissals;
+
     public function __construct()
     {
         $this->presets = new ArrayCollection();
@@ -83,6 +89,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->features = new ArrayCollection();
         $this->passwordResetTokens = new ArrayCollection();
         $this->chartReports = new ArrayCollection();
+        $this->userNoticeDismissals = new ArrayCollection();
     }
 
     public function isAdmin(): bool
@@ -355,5 +362,51 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, UserNoticeDismissal>
+     */
+    public function getUserNoticeDismissals(): Collection
+    {
+        return $this->userNoticeDismissals;
+    }
+
+    public function addUserNoticeDismissal(UserNoticeDismissal $userNoticeDismissal): static
+    {
+        if (!$this->userNoticeDismissals->contains($userNoticeDismissal)) {
+            $this->userNoticeDismissals->add($userNoticeDismissal);
+            $userNoticeDismissal->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUserNoticeDismissal(UserNoticeDismissal $userNoticeDismissal): static
+    {
+        if ($this->userNoticeDismissals->removeElement($userNoticeDismissal)) {
+            // set the owning side to null (unless already changed)
+            if ($userNoticeDismissal->getUser() === $this) {
+                $userNoticeDismissal->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function dismissNotice(UserNotice $notice): void
+    {
+        foreach ($this->userNoticeDismissals as $dismissal) {
+            if ($dismissal->getNotice() === $notice) {
+                // Notice already dismissed
+                return;
+            }
+        }
+
+        $dismissal = new UserNoticeDismissal();
+        $dismissal->setUser($this);
+        $dismissal->setNotice($notice);
+        $this->addUserNoticeDismissal($dismissal);
+        return;
     }
 }
