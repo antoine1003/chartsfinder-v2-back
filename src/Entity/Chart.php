@@ -61,9 +61,9 @@ class Chart
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?bool $needProxy = true;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
-    private ?bool $onlyExternal = true;
+    private ?bool $onlyExternal = false;
 
     #[ORM\Column(length: 255)]
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
