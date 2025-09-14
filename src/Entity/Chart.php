@@ -61,6 +61,10 @@ class Chart
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?bool $needProxy = true;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
+    private ?bool $onlyExternal = true;
+
     #[ORM\Column(length: 255)]
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $shortName = null;
@@ -233,5 +237,15 @@ class Chart
         }
 
         return $this;
+    }
+
+    public function getOnlyExternal(): ?bool
+    {
+        return $this->onlyExternal;
+    }
+
+    public function setOnlyExternal(?bool $onlyExternal): void
+    {
+        $this->onlyExternal = $onlyExternal;
     }
 }

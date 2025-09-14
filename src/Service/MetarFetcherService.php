@@ -20,7 +20,7 @@ readonly class MetarFetcherService
     ) {}
 
 
-    public function fetch(string $icao): string
+    public function fetch(string $icao): ?string
     {
         foreach ($this->metarProviders as $provider) {
             try {
@@ -31,6 +31,6 @@ readonly class MetarFetcherService
             }
         }
 
-        return '';
+        return null;
     }
 }
