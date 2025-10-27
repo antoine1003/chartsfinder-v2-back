@@ -50,7 +50,7 @@ class Runway
     private ?int $ilsQdm = null;
 
     #[ORM\Column(length: 10, nullable: true)]
-    #[Groups(['preset:detail', 'airport:detail', 'airport:list'])]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'chart:list'])]
     private ?string $ident = null;
 
     #[ORM\Column(type: 'float', nullable: true)]

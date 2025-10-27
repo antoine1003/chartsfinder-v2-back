@@ -54,7 +54,7 @@ class Chart
      * @var Collection<int, Runway>
      */
     #[ORM\ManyToMany(targetEntity: Runway::class, inversedBy: 'charts')]
-    #[Groups(['chart:detail', 'preset:detail'])]
+    #[Groups(['chart:detail', 'preset:detail', 'chart:list'])]
     private Collection $runways;
 
     #[ORM\Column(type: 'boolean', options: ['default' => true])]

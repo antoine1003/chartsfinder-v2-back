@@ -29,10 +29,6 @@ class ChartController extends AbstractRestController
     public function reportChart(
         Chart $chart,
     ): JsonResponse {
-        /**
-         * @var User $user
-         */
-        $user = $this->getUser();
         try {
             $this->service->reportChart($chart);
         } catch (ChartAlreadyReportedException $e) {

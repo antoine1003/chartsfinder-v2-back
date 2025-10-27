@@ -3,7 +3,6 @@
 namespace App\Event;
 
 use App\Entity\Feature;
-use App\Entity\User;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class NewFeatureEvent extends Event
