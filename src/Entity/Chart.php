@@ -24,7 +24,7 @@ class Chart
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: 'text')]
     #[Groups(['chart:list', 'chart:detail', 'preset:detail', 'report:detail'])]
     private ?string $name = null;
 
