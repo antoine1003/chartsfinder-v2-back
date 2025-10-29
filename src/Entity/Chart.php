@@ -11,7 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ChartRepository::class)]
 #[ORM\Table(name: 'chart', indexes: [
-    new ORM\Index(name: 'chart_name_idx', columns: ['name'])
+    new ORM\Index(name: 'chart_name_idx', columns: ['name'], options: ['lengths' => [255]]),
 ])]
 #[ORM\UniqueConstraint(name: 'chart_airport_name_unique', columns: ['airport_id', 'name'])]
 class Chart
