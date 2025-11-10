@@ -25,6 +25,8 @@ readonly class SendEmailVerificationListener
     public function onUserRegistered(UserRegisteredEvent $event): void
     {
         $user = $event->getUser();
+        $success = true;
+        $verificationUrl = null;
         if (is_null($user->getGoogleId())) {
             $verificationUrl = $this->urlGenerator->generate(
                 'app_verify_email',
@@ -44,13 +46,6 @@ readonly class SendEmailVerificationListener
                     $verificationUrl,
                     $verificationUrl
                 ));
-
-            $this->mailer->send($email);
-
-            $this->logger->info('Email verification sent', [
-                'user' => $user->getEmail(),
-                'verificationUrl' => $verificationUrl,
-            ]);
         } else {
             // Send email to administrator for Google account registration
             $email = (new Email())
@@ -64,8 +59,27 @@ readonly class SendEmailVerificationListener
                  <p>Chartsfinder V2</p>',
                     $user->getEmail()
                 ));
+        }
 
+        try {
             $this->mailer->send($email);
+        } catch (TransportExceptionInterface $e) {
+            $this->logger->error('Failed to send email verification', [
+                'user' => $user->getEmail(),
+                'error' => $e->getMessage(),
+            ]);
+            $success = false;
+        }
+
+        if (!$success) {
+            return;
+        }
+
+        if (is_null($user->getGoogleId())) {
+            $this->logger->info('Email verification sent', [
+                'user' => $user->getEmail(),
+                'verificationUrl' => $verificationUrl,
+            ]);
         }
     }
 }
