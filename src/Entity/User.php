@@ -82,6 +82,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: UserNoticeDismissal::class, mappedBy: 'user', cascade: ['persist'],)]
     private Collection $userNoticeDismissals;
 
+    /**
+     * @var Collection<int, Airport>
+     */
+    #[ORM\ManyToMany(targetEntity: Airport::class, inversedBy: 'users')]
+    private Collection $favoriteAirports;
+
     public function __construct()
     {
         $this->presets = new ArrayCollection();
@@ -90,6 +96,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->passwordResetTokens = new ArrayCollection();
         $this->chartReports = new ArrayCollection();
         $this->userNoticeDismissals = new ArrayCollection();
+        $this->favoriteAirports = new ArrayCollection();
     }
 
     public function isAdmin(): bool
@@ -408,5 +415,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $dismissal->setNotice($notice);
         $this->addUserNoticeDismissal($dismissal);
         return;
+    }
+
+    /**
+     * @return Collection<int, Airport>
+     */
+    public function getFavoriteAirports(): Collection
+    {
+        return $this->favoriteAirports;
+    }
+
+    public function addFavoriteAirport(Airport $favoriteAirport): static
+    {
+        if (!$this->favoriteAirports->contains($favoriteAirport)) {
+            $this->favoriteAirports->add($favoriteAirport);
+        }
+
+        return $this;
+    }
+
+    public function removeFavoriteAirport(Airport $favoriteAirport): static
+    {
+        $this->favoriteAirports->removeElement($favoriteAirport);
+
+        return $this;
     }
 }

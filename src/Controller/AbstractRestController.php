@@ -99,7 +99,7 @@ abstract class AbstractRestController extends AbstractController
 
         $items = $this->service->search($searchCriteriaDto);
 
-        $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list']);
+        $json = $serializer->serialize($items, 'json', ['groups' => $this->getGroupPrefix() . ':list', 'is_search' => true]);
         return new JsonResponse($json, Response::HTTP_OK, [], true);
     }
 
