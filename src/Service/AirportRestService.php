@@ -4,8 +4,10 @@ namespace App\Service;
 
 use App\Dto\SearchCriteriaDto;
 use App\Entity\Airport;
+use App\Entity\User;
 use App\Repository\AirportRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
@@ -15,7 +17,8 @@ use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 class AirportRestService extends AbstractRestService
 {
     public function __construct(
-        protected EntityManagerInterface $entityManager
+        protected EntityManagerInterface $entityManager,
+        protected Security $security
     )
     {
         parent::__construct(Airport::class, $entityManager);
@@ -57,5 +60,24 @@ class AirportRestService extends AbstractRestService
         $queryBuilder->andWhere('e.charts IS NOT EMPTY');
 
         return $queryBuilder->getQuery()->getResult();
+    }
+
+    public function toggleFavorite(Airport $airport): Airport
+    {
+        /** @var User $user */
+        $user = $this->security->getUser();
+        if (!$user) {
+            throw new BadRequestHttpException('User not authenticated');
+        }
+
+        if ($user->getFavoriteAirports()->contains($airport)) {
+            $user->removeFavoriteAirport($airport);
+        } else {
+            $user->addFavoriteAirport($airport);
+        }
+
+        $this->entityManager->flush();
+
+        return $airport;
     }
 }
