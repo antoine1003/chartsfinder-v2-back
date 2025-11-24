@@ -58,10 +58,17 @@ class Airport
     #[ORM\ManyToMany(targetEntity: Preset::class, mappedBy: 'charts', cascade: ['persist'])]
     private Collection $presets;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'favoriteAirports')]
+    private Collection $users;
+
     public function __construct()
     {
         $this->charts = new ArrayCollection();
         $this->presets = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function __clone(): void
@@ -202,4 +209,35 @@ class Airport
         return $this;
     }
 
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addFavoriteAirport($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeFavoriteAirport($this);
+        }
+
+        return $this;
+    }
+
+    public function isFavorite(User $user): bool
+    {
+        return $this->users->contains($user);
+    }
 }
