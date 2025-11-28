@@ -17,6 +17,9 @@ doctrine:
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
         auto_mapping: true
+        dql:
+            numeric_functions:
+                rand: DoctrineExtensions\Query\Mysql\Rand
         mappings:
             App:
                 type: attribute
