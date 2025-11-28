@@ -9,9 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AirportRepository::class)]
-#[ORM\Table(name: 'airport', indexes: [
-    new ORM\Index(name: 'icao_code_idx', columns: ['icao_code'])
-])]
+#[ORM\Table(name: 'airport')]
+#[ORM\Index(name: 'icao_code_idx', columns: ['icao_code'])]
 class Airport
 {
     #[ORM\Id]

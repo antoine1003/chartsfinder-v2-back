@@ -10,9 +10,8 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ChartRepository::class)]
-#[ORM\Table(name: 'chart', indexes: [
-    new ORM\Index(name: 'chart_name_idx', columns: ['name'], options: ['lengths' => [191]]),
-])]
+#[ORM\Table(name: 'chart')]
+#[ORM\Index(name: 'chart_name_idx', columns: ['name'], options: ['lengths' => [191]])]
 #[ORM\UniqueConstraint(name: 'chart_airport_name_unique', columns: ['airport_id', 'name'], options: ['lengths' => [null, 191]])]
 class Chart
 {
