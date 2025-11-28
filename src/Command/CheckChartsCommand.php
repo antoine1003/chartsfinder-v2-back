@@ -169,41 +169,6 @@ class CheckChartsCommand extends Command
                         </td>
                     </tr>';
 
-        // Successful Charts Section
-        if (count($successes) > 0) {
-            $html .= '
-                    <tr>
-                        <td style="padding: 0 30px 20px;">
-                            <h2 style="margin: 0 0 15px; color: #16a34a; font-size: 18px; font-weight: 600; display: flex; align-items: center;">
-                                <span style="display: inline-block; width: 24px; height: 24px; margin-right: 8px; font-size: 18px;">✅</span>
-                                Successful Charts (' . count($successes) . ')
-                            </h2>
-                            <table role="presentation" style="width: 100%; border-collapse: collapse;">';
-
-            foreach ($successes as $chart) {
-                $html .= '
-                                <tr>
-                                    <td style="padding: 12px; background-color: #f9fafb; border-left: 3px solid #16a34a; margin-bottom: 8px; border-radius: 4px;">
-                                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">' . htmlspecialchars($chart->getName()) . '</div>
-                                        <div style="font-size: 13px; color: #64748b; margin-bottom: 6px;">
-                                            ICAO: <span style="font-weight: 500; color: #475569;">' . htmlspecialchars($chart->getAirport()?->getIcaoCode() ?? 'N/A') . '</span>
-                                            <span style="margin: 0 8px; color: #cbd5e1;">•</span>
-                                            <span style="color: #16a34a; font-weight: 500;">200 OK</span>
-                                        </div>
-                                        <div style="font-size: 12px;">
-                                            <a href="' . htmlspecialchars($chart->getUrl()) . '" style="color: #667eea; text-decoration: none; word-break: break-all;">' . htmlspecialchars($chart->getUrl()) . '</a>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr><td style="height: 8px;"></td></tr>';
-            }
-
-            $html .= '
-                            </table>
-                        </td>
-                    </tr>';
-        }
-
         // Failed Charts Section
         if (count($failures) > 0) {
             $html .= '
@@ -240,6 +205,43 @@ class CheckChartsCommand extends Command
                         </td>
                     </tr>';
         }
+
+
+        // Successful Charts Section
+        if (count($successes) > 0) {
+            $html .= '
+                    <tr>
+                        <td style="padding: 0 30px 20px;">
+                            <h2 style="margin: 0 0 15px; color: #16a34a; font-size: 18px; font-weight: 600; display: flex; align-items: center;">
+                                <span style="display: inline-block; width: 24px; height: 24px; margin-right: 8px; font-size: 18px;">✅</span>
+                                Successful Charts (' . count($successes) . ')
+                            </h2>
+                            <table role="presentation" style="width: 100%; border-collapse: collapse;">';
+
+            foreach ($successes as $chart) {
+                $html .= '
+                                <tr>
+                                    <td style="padding: 12px; background-color: #f9fafb; border-left: 3px solid #16a34a; margin-bottom: 8px; border-radius: 4px;">
+                                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">' . htmlspecialchars($chart->getName()) . '</div>
+                                        <div style="font-size: 13px; color: #64748b; margin-bottom: 6px;">
+                                            ICAO: <span style="font-weight: 500; color: #475569;">' . htmlspecialchars($chart->getAirport()?->getIcaoCode() ?? 'N/A') . '</span>
+                                            <span style="margin: 0 8px; color: #cbd5e1;">•</span>
+                                            <span style="color: #16a34a; font-weight: 500;">200 OK</span>
+                                        </div>
+                                        <div style="font-size: 12px;">
+                                            <a href="' . htmlspecialchars($chart->getUrl()) . '" style="color: #667eea; text-decoration: none; word-break: break-all;">' . htmlspecialchars($chart->getUrl()) . '</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr><td style="height: 8px;"></td></tr>';
+            }
+
+            $html .= '
+                            </table>
+                        </td>
+                    </tr>';
+        }
+
 
         // Footer
         $html .= '
