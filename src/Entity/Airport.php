@@ -19,9 +19,9 @@ class Airport
     #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'report:detail'])]
     private int $id;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'report:detail'])]
-    private string $name;
+    private ?string $name = null;
 
     #[ORM\Column(type: 'float')]
     private float $latitudeDeg;
@@ -63,6 +63,10 @@ class Airport
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'favoriteAirports')]
     private Collection $users;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['preset:detail', 'airport:detail', 'airport:list', 'report:detail'])]
+    private ?string $city = null;
+
     public function __construct()
     {
         $this->charts = new ArrayCollection();
@@ -86,12 +90,12 @@ class Airport
         $this->id = $id;
     }
 
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(?string $name): static
     {
         $this->name = $name;
         return $this;
@@ -238,5 +242,17 @@ class Airport
     public function isFavorite(User $user): bool
     {
         return $this->users->contains($user);
+    }
+
+    public function getCity(): ?string
+    {
+        return $this->city;
+    }
+
+    public function setCity(?string $city): static
+    {
+        $this->city = $city;
+
+        return $this;
     }
 }
